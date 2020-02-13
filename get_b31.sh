@@ -5,9 +5,10 @@
 #SBATCH -q batch 
 #SBATCH -J b31-getfiles
 
-module load hpss
-rundir=/scratch1/NCEPDEV/stmp2/Lydia.B.Stefanova/fromHPSS/ufs_b31
 
+exp=b31
+module load hpss
+rundir=/scratch1/NCEPDEV/stmp2/Lydia.B.Stefanova/fromHPSS/ufs_${exp}
 
 for yyyy in {2011..2018..1} ; do
    for mm in {1..12..1} ; do
@@ -21,14 +22,12 @@ for yyyy in {2011..2018..1} ; do
 
               cd $rundir
               echo working on $tag
-               base=/NCEPDEV/emc-climate/5year/Jiande.Wang/WCOSS/benchmark3.1/c384/$tag
+              base=/NCEPDEV/emc-climate/5year/Jiande.Wang/WCOSS/benchmark3.1/c384/$tag
 
-
-
-              archive1=$base/gfs_flux_1p00.tar
-              #archive2=$base/SST.tar
-              #archive2=$base/gfs_pgrb2b.tar
-              #archive3=$base/gfs_flux.tar
+              atmflux1p00=$base/gfs_flux_1p00.tar
+              sst=$base/SST.tar
+              pgrb2b=$base/gfs_pgrb2b.tar
+              atmflux=$base/gfs_flux.tar
               ocean=$base/ocn.tar
               ice=$base/ice.tar
 
@@ -37,8 +36,7 @@ for yyyy in {2011..2018..1} ; do
               fi
 
               cd $tag
-              htar -xvf $archive1
-              #htar -xvf $ice
+              htar -xvf $atmflux1p00
    
            else 
               echo "skipping $tag"
