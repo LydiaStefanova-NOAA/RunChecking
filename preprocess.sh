@@ -25,9 +25,13 @@ do
             res)         res=${VALUE} ;;
             ystart)      ystart=${VALUE} ;;
             yend)        yend=${VALUE} ;;
+            ystep)       ystep=${VALUE} ;;
             mstart)      mstart=${VALUE} ;;
             mend)        mend=${VALUE} ;;
             mstep)       mstep=${VALUE} ;;
+            dstart)      dstart=${VALUE} ;;
+            dend)        dend=${VALUE} ;;
+            dstep)       dstep=${VALUE} ;;
             *) ;;
     esac
 
@@ -40,9 +44,9 @@ done
 myarray=(land tmpsfc tmp2m t2min t2max ulwrftoa dlwrf dswrf ulwrf uswrf prate pwat icetk icec cloudbdry cloudlow cloudmid cloudhi snow weasd snod lhtfl shtfl pres u10 v10 uflx vflx)
 
 
-for (( yyyy=$ystart; yyyy<=$yend; yyyy+=1 )); do
+for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )); do
     for (( mm1=$mstart; mm1<=$mend; mm1+=$mstep )); do
-        for dd1 in {1..15..14} ; do      # getting the first of the month
+        for (( dd1=$dstart; dd1<=$dend; dd1+=$dstep )); do
             mm=$(printf "%02d" $mm1)
             dd=$(printf "%02d" $dd1)
             tag=${yyyy}${mm}${dd}
@@ -52,13 +56,9 @@ for (( yyyy=$ystart; yyyy<=$yend; yyyy+=1 )); do
                echo " indir $indir does not exist"
             else
 
-            if [ ! -d $whereto ] ; then mkdir $whereto ; fi
-            if [ ! -d $whereto/6hrly ] ; then mkdir $whereto/6hrly ; fi
-            if [ ! -d $whereto/dailymean ] ; then mkdir $whereto/dailymean ; fi
-            if [ ! -d $whereto/6hrly/${tag} ] ; then mkdir $whereto/6hrly/${tag} ; fi
-            if [ ! -d $whereto/dailymean/${tag} ] ; then mkdir $whereto/dailymean/${tag} ; fi
-
-
+            if [ ! -d $whereto/6hrly/${tag} ] ; then mkdir -p $whereto/6hrly/${tag} ; fi
+            if [ ! -d $whereto/dailymean/${tag} ] ; then mkdir -p $whereto/dailymean/${tag} ; fi
+            
             case "${myarray[@]}" in 
                 *"$varname"*)  ;; 
                 *)
