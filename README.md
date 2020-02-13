@@ -1,12 +1,12 @@
-# RunChecking
-# First, get files from HPSS
 
-get_b31.sh
+First, get files from HPSS
 
-# Second, extract desired variables and convert to 1x1
+    get_b31.sh
 
-drive_preprocess.sh # (uses preprocess.sh)
+Second, extract desired variables and convert to 1x1
 
-# Third, plot maps of average bias and difference
+    drive_preprocess.sh # (uses preprocess.sh)
 
-drive_mapobs.sh   # (uses map_compare_obs.sh)
+Third, plot maps of average bias and difference
+
+    drive_mapobs.sh   # (uses map_compare_obs.sh)
