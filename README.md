@@ -1,12 +1,15 @@
+First, specify settings by editing
+    
+    settings.sh
+   
+Second, get files from HPSS
 
-First, get files from HPSS
+    sbatch get_exp.sh
 
-    get_b31.sh
+Third, extract desired variables and convert to daily
 
-Second, extract desired variables and convert to 1x1
+    sbatch drive_preprocess.sh # (uses preprocess.sh)
 
-    drive_preprocess.sh # (uses preprocess.sh)
+Fourth, plot maps of average bias and difference
 
-Third, plot maps of average bias and difference
-
-    drive_mapobs.sh   # (uses map_compare_obs.sh)
+    sbatch drive_mapobs.sh   # (uses map_compare_obs.sh)
