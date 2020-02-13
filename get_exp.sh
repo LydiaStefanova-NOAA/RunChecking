@@ -6,7 +6,7 @@
 #SBATCH -J b31-getfiles
 
 module load hpss
-source settings.sh
+source common_settings.sh
 for exp in $exp1 $exp2 ; do
     upload_location=${upload_root}/${exp}
     for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )) ; do

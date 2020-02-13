@@ -9,7 +9,7 @@ module load intel/19.0.5.281
 module load nco
 module load cdo
 module load wgrib2
-source settings.sh
+source common_settings.sh
 
 
 # The scripts are prepared to handle variables on the list below:

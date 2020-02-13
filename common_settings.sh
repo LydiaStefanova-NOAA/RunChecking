@@ -1,5 +1,3 @@
-# Settings common to uploading and preprocessing scripts
-#
     # Start/end delimiters for initial conditions
         ystart=2012; yend=2013;  ystep=1
         mstart=1;    mend=12;    mstep=3
@@ -16,14 +14,4 @@
     # Other locations
         upload_root=/scratch1/NCEPDEV/stmp2/Lydia.B.Stefanova/fromHPSS/             # store uploaded data here
         processed_root=/scratch2/NCEPDEV/climate/Lydia.B.Stefanova/Models/          # store processed data here 
-
-    # These generally do not change: 
-        obs_root=/scratch2/NCEPDEV/climate/Lydia.B.Stefanova/ReferenceData/
-        res=1p00
-
-# Settings for graphical analysis
-#
-        hardcopy=no           # yes/no       
-        domain=Global20      
-        season=AllAvailable   # DJF | MAM | JJA | SON | AllAvailable 
 
