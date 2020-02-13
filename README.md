@@ -2,9 +2,7 @@ The scripts in this directory are intended for comparing the biases of two proto
 
 Biases are calculated in reference to observations that have been previously prepared and reside in subdirectories within obs_root=/scratch2/NCEPDEV/climate/Lydia.B.Stefanova/ReferenceData/
 
-
-
-To run the whole process (from obtaining data from HPSS to producing image):
+To run the whole process (from obtaining data from HPSS to producing image),
 
 First, specify settings by editing
     
