@@ -29,9 +29,13 @@ do
             nameModelB) nameModelB=${VALUE} ;;
             ystart)     ystart=${VALUE};;
             yend)       yend=${VALUE};;
+            ystep)       ystep=${VALUE};;
             mstart)     mstart=${VALUE};;
             mend)       mend=${VALUE};;
             mstep)      mstep=${VALUE};;
+            dstart)     dstart=${VALUE};;
+            dend)       dend=${VALUE};;
+            dstep)      dstep=${VALUE};;
             d1)         d1=${VALUE};;
             d2)         d2=${VALUE};;
             *)
@@ -49,6 +53,8 @@ case "$domain" in
     "Global60") latS="-60"; latN="90" ;  lonW="0" ; lonE="360" ;;
     "CONUS") latS="25"; latN="60" ;  lonW="210" ; lonE="300" ;;
     "NAM") latS="0"; latN="90" ;  lonW="180" ; lonE="360" ;;
+    "NP") latS="50"; latN="90" ;  lonW="0" ; lonE="360" ;;
+    "SP") latS="-90"; latN="-50" ;  lonW="0" ; lonE="360" ;;
     "IndoChina") latS="-20"; latN="40" ;  lonW="30" ; lonE="150" ;;
     *)
 esac
@@ -83,9 +89,9 @@ esac
 
        LENGTH=0
        pass=0
-       for (( yyyy=$ystart; yyyy<=$yend; yyyy+=1 )) ; do
+       for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )) ; do
        for (( mm1=$mstart; mm1<=$mend; mm1+=$mstep )) ; do
-       for dd1 in {1..15..14} ; do
+       for (( dd1=$dstart; dd1<=$dend; dd1+=$dstep )) ; do
            mm=$(printf "%02d" $mm1)
            dd=$(printf "%02d" $dd1)
            tag=$yyyy$mm${dd}

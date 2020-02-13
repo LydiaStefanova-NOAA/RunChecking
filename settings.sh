@@ -12,5 +12,11 @@ hpss_root2=/NCEPDEV/emc-climate/5year/Jiande.Wang/WCOSS/benchmark3.1/c384/  # po
 
 upload_root=/scratch1/NCEPDEV/stmp2/Lydia.B.Stefanova/fromHPSS/             # store uploaded data here
 processed_root=/scratch2/NCEPDEV/climate/Lydia.B.Stefanova/Models/          # store processed data here 
-
+obs_root=/scratch2/NCEPDEV/climate/Lydia.B.Stefanova/ReferenceData/
 res=1p00
+
+# Settings for graphical analysis
+hardcopy=no           # yes/no       
+domain=Global20      
+season=AllAvailable   # DJF | MAM | JJA | SON | AllAvailable 
+
