@@ -4,24 +4,10 @@ Biases are calculated in reference to observations that have been previously pre
 
 To run the whole process (from obtaining data from HPSS to producing image),
 
-First, specify settings by editing
-    
-    common_settings.sh
-   
-Second, get files from HPSS
+- Specify settings: common_settings.sh, graph_settings.sh
+- Get files from HPSS: sbatch get_exp.sh
+- Go from individual 6-hourly grib2 files to one netcdf with daily values: sbatch drive_preprocess.sh # (uses preprocess.sh)
+- Plot maps of average bias and difference: sbatch drive_mapobs.sh   # (uses map_compare_obs.sh)
+- Produce line plots of area mean values, area mean bias, RMSE and bias-corrected RMSE: sbatch drive_anoms.sh
 
-    sbatch get_exp.sh
-
-Third, extract desired variables and convert to daily
-
-    sbatch drive_preprocess.sh # (uses preprocess.sh)
-
-Fourth, specify graphical analysis settings by specifying
-
-    graph_settings.sh
-    
-Fifth, plot maps of average bias and difference
-
-    sbatch drive_mapobs.sh   # (uses map_compare_obs.sh)
-
-Note that the last step generates a number of ncl and txt files - if not interested in the contents, clean up manually.
+Note that the last two steps generate a number of ncl and txt files - if not interested in the contents, clean up manually.
