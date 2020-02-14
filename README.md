@@ -11,9 +11,9 @@ To run the whole process (from obtaining data from HPSS to producing image(s)),
 
 - Specify settings: edit `common_settings.sh`, `graph_settings.sh`
 - Get files from HPSS: `sbatch get_exp.sh`
-- Go from individual 6-hourly grib2 files to one netcdf with daily values: `sbatch drive_preprocess.sh` # (invokes *preprocess.sh*)
-- Produce maps of average bias and difference: `drive_mapobs.sh`   # (invokes *map_compare_obs.sh*)
-- Produce line plots of area mean values, area mean bias, RMSE and bias-corrected RMSE: `drive_anoms.sh` # (invokes *anoms12.sh*)
+- Go from individual 6-hourly grib2 files to one netcdf with daily values: `sbatch drive_preprocess.sh` # (invokes `preprocess.sh`)
+- Produce maps of average bias and difference: `drive_mapobs.sh`   # (invokes `map_compare_obs.sh`)
+- Produce line plots of area mean values, area mean bias, RMSE and bias-corrected RMSE: `drive_anoms.sh` # (invokes `anoms12.sh`)
 
 Note that the last two steps generate a number of ncl and txt files - if not interested in the contents, clean up manually.
 
