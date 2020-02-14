@@ -1,7 +1,7 @@
     # Start/end delimiters for initial conditions
         ystart=2012; yend=2013;  ystep=1
         mstart=1;    mend=12;    mstep=3
-        dstart=1;    dend=1;     dstep=14
+        dstart=1;    dend=1;     dstep=14        # to use ICs starting on the 1st and 15th, set dstart=1; dend=15; dstep=14
 
     # Name and location of experiments
 
