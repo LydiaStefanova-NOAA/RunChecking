@@ -7,7 +7,7 @@
 
 module load hpss
 source common_settings.sh
-for exp in $exp1 $exp2 ; do
+for exp in $exp_new ; do
     upload_location=${upload_root}/${exp}
     for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )) ; do
     for (( mm1=$mstart; mm1<=$mend; mm1+=$mstep )) ; do

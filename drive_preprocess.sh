@@ -14,7 +14,7 @@ source common_settings.sh
 
 # The scripts are prepared to handle variables on the list below:
 oknames=(land tmpsfc tmp2m t2min t2max ulwrftoa dlwrf dswrf ulwrf uswrf prate pwat icetk icec cloudbdry cloudlow cloudmid cloudhi snow weasd snod lhtfl shtfl pres u10 v10 uflx vflx )
-for exp in $exp1 $exp2 ; do
+for exp in $exp_new ; do
     wherefrom=${upload_root}/${exp}
     whereto=${processed_root}/${exp}/${res}
     mkdir -p $whereto

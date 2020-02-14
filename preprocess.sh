@@ -161,7 +161,7 @@ for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )); do
                tomatch="ICEC:surface:";  aggregate="-daymean"
             fi
 
-    
+            if [ -d ${indir} ] ; then 
             if [ ! -f ${whereto}/6hrly/${tag}/${varname}.${exp}.${tag}.${res}.grib2 ] ; then 
 
                      echo "aggregating $exp $tag $varname"
@@ -208,6 +208,7 @@ for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )); do
                           $whereto/dailymean/${tag}/${varname}.${exp}.${tag}.dailymean.${res}.nc > /dev/null
                    fi
 
+            fi
             fi
 done
 done
