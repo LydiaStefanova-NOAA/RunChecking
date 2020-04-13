@@ -1,7 +1,13 @@
     # Start/end delimiters for initial conditions
+<<<<<<< HEAD
         ystart=2011; yend=2018;  ystep=1
         mstart=1;    mend=12;    mstep=1
         dstart=1;    dend=15;     dstep=14
+=======
+        ystart=2012; yend=2013;  ystep=1
+        mstart=1;    mend=12;    mstep=3
+        dstart=1;    dend=1;     dstep=14        # to use ICs starting on the 1st and 15th, set dstart=1; dend=15; dstep=14
+>>>>>>> f397f9ad1194440814569d3595484e511e85020f
 
     # Name and location of experiment output on HPSS
 
