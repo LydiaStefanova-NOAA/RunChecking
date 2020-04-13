@@ -11,11 +11,19 @@ source graph_settings.sh
 
 whereexp=$processed_root
 whereobs=$obs_root
+domain=Global50
+exp_new=ufs_b32
+exp_old=ufs_b31
+#varname=ulwrftoa
+
+varname=tmp2m
+varname=t2m_fromminmax
 
 for season in "${season[@]}" ; do
-   for varname in "${var[@]}" ; do
-       bash map_compare_obs.sh whereexp=$whereexp  whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new ystart=$ystart yend=$yend ystep=$ystep  mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep d1=0 d2=0
-       bash map_compare_obs.sh whereexp=$whereexp  whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new ystart=$ystart yend=$yend  ystep=$ystep mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep d1=14 d2=27
-   done
+#   for varname in "${var[@]}" ; do
+       bash map_compare_obs.sh whereexp=$whereexp  whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new ystart=$ystart yend=$yend ystep=$ystep  mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep d1=0 d2=9
+       bash map_compare_obs.sh whereexp=$whereexp  whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new ystart=$ystart yend=$yend  ystep=$ystep mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep d1=10 d2=19
+       bash map_compare_obs.sh whereexp=$whereexp  whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new ystart=$ystart yend=$yend  ystep=$ystep mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep d1=20 d2=29
+#   done
 done
 

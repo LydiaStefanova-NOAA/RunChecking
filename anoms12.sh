@@ -59,6 +59,14 @@ esac
           ncvarModel="TMAX_2maboveground"; multModel=1.; offsetModel=0.; units="deg K"
           nameObs="t2max_CPC";  varObs="tmax"; ncvarObs="tmax"; multObs=1.; offsetObs=273.15
        fi
+       if [ "$varModel" == "tmp2m" ] ; then
+          ncvarModel="TMP_2maboveground"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
+          nameObs="era5";  varObs="t2m"; ncvarObs="TMP_2maboveground"; multObs=1.; offsetObs=0.
+       fi
+       if [ "$varModel" == "t2m_fromminmax" ] ; then
+          ncvarModel="t2m_fromminmax"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
+          nameObs="t2m_from_minmax_CPC";  varObs="t2m_CPC"; ncvarObs="t2m"; multObs=1.; offsetObs=273.15
+       fi
        if [ "$varModel" == "t2min" ] ; then
           ncvarModel="TMIN_2maboveground"; multModel=1.; offsetModel=0.; units="deg K"
           nameObs="t2min_CPC";  varObs="tmin"; ncvarObs="tmin"; multObs=1.; offsetObs=273.15
@@ -208,7 +216,7 @@ cat << EOF > $nclscript
      wks_type@wkHeight            = 800
   end if 
 
-  wks                          = gsn_open_wks(wks_type,"rmse.${varModel}.${nameModelA}.${nameModelB}.${season}.${truelength}IC.$domain.$mask")
+  wks                          = gsn_open_wks(wks_type,"rmse.${varModel}.${nameModelA}.${nameModelB}.${season}.${ystart}-${yend}.${truelength}IC.$domain.$mask")
 
   latStart=${latS}
   latEnd=${latN}
@@ -233,7 +241,7 @@ cat << EOF > $nclscript
 ;   Note that 1 is land, 0 is ocean, 2 is ice-covered ocean
 ;   variable "masker" is set to fill value over land
 
-  mask_add=addfile("$whereexp/$nameModelB/1p00/dailymean/20120101/land.${nameModelB}.20120101.dailymean.1p00.nc", "r")
+  mask_add=addfile("$whereexp/$nameModelB/1p00/dailymean/20120801/land.${nameModelB}.20120801.dailymean.1p00.nc", "r")
   masker=mask_add->LAND_surface(0,:,:)
   masker=where(masker.ne.1,masker,masker@_FillValue)   
 
@@ -501,7 +509,7 @@ cat << EOF > $nclscript
   plot(3)=gsn_csm_xy(wks,ispan(1,35,1),data3(:,0:34),res2)
 
   panelopts                   = True
-  panelopts@gsnPanelMainString = "$domain, $mask, ${varModel}, $season,  $truelength ICs"
+  panelopts@gsnPanelMainString = "$domain, $mask, ${varModel}, $season, ${ystart}-${yend}, $truelength ICs"
 
   panelopts@amJust   = "TopLeft"
   panelopts@gsnOrientation    = "landscape"

@@ -14,31 +14,25 @@
    whereexp=$processed_root
    whereobs=$obs_root
 
-for season in "${season[@]}" ; do
+   exp_old=ufs_b3
+   exp_new=ufs_b31
+   ystart=2012; yend=2014
 
-    for varname in tmpsfc ; do
-        for domain in Global20 Global50 Nino3.4 ; do
+   for season in "${season[@]}" ; do
+      for domain in Global20 Global50 ; do
+        for varname in tmpsfc ; do
+            ystart=2012; yend=2014
+            bash anoms12.sh whereexp=$whereexp whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new  ystart=$ystart yend=$yend ystep=$ystep mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep mask=oceanonly
+            ystart=2015; yend=2017
             bash anoms12.sh whereexp=$whereexp whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new  ystart=$ystart yend=$yend ystep=$ystep mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep mask=oceanonly
         done
-    done
-
-    for varname in t2max t2min; do
-        for domain in CONUS Global20 Global50; do
-           bash anoms12.sh whereexp=$whereexp whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new  ystart=$ystart yend=$yend ystep=$ystep mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep mask=landonly
-
-        done
-     done
-    for varname in ulwrftoa ; do
-         for domain in SP NP Global20 Global50; do
-             bash anoms12.sh whereexp=$whereexp whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new  ystart=$ystart yend=$yend ystep=$ystep mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep mask=nomask
-         done
-    done
-
-    for varname in prate ; do
-        for domain in Global20 Global50 Nino3.4 ; do
+        for varname in prate ; do
+            ystart=2012; yend=2014
+            bash anoms12.sh whereexp=$whereexp whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new  ystart=$ystart yend=$yend ystep=$ystep mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep mask=nomask
+            ystart=2015; yend=2017
             bash anoms12.sh whereexp=$whereexp whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new  ystart=$ystart yend=$yend ystep=$ystep mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep mask=nomask
         done
-    done
+     done
+   done
 
- done
 

@@ -16,12 +16,16 @@ for exp in $exp_new ; do
         dd=$(printf "%02d" $dd1)
         tag=$yyyy$mm${dd}00
         if [ ! -f ${upload_location}/$tag/gfs.$yyyy$mm$dd/00/gfs.t00z.flux.1p00.f840 ] ; then 
+        #if [ ! -f ${upload_location}/$tag/gfs.$yyyy$mm$dd/00/gfs.t00z.sfluxgrbf840.grib2 ] ; then
            hpss_location=${hpss_root}/$tag
            atmflux1p00=gfs_flux_1p00.tar
+           #atmfluxOrig=gfs_flux.tar
+           #atmflux1p00=gfs_flux.tar
            echo "Working on $tag for $exp"
            mkdir -p ${upload_location}/$tag
            cd ${upload_location}/$tag
            htar -xvf ${hpss_location}/$atmflux1p00
+           #htar -xvf ${hpss_location}/$atmfluxOrig
         else
            echo "$exp $tag  already uploaded" 
         fi

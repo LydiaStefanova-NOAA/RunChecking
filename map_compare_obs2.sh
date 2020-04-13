@@ -67,16 +67,6 @@ esac
           ncvarModel="TMIN_2maboveground"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
           nameObs="t2min_CPC";  varObs="tmin"; ncvarObs="tmin"; multObs=1.; offsetObs=273.15
        fi
-       if [ "$varModel" == "t2m_fromminmax" ] ; then
-          ncvarModel="t2m_fromminmax"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
-          nameObs="era5";  varObs="t2m"; ncvarObs="TMP_2maboveground"; multObs=1.; offsetObs=0.
-          nameObs="t2m_from_minmax_CPC";  varObs="t2m_CPC"; ncvarObs="t2m"; multObs=1.; offsetObs=273.15
-       fi
-       if [ "$varModel" == "tmp2m" ] ; then
-          ncvarModel="TMP_2maboveground"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
-          nameObs="era5";  varObs="t2m"; ncvarObs="TMP_2maboveground"; multObs=1.; offsetObs=0.
-          nameObs="t2m_from_minmax_CPC";  varObs="t2m_CPC"; ncvarObs="t2m"; multObs=1.; offsetObs=273.15
-       fi
        if [ "$varModel" == "tmpsfc" ] ; then
           ncvarModel="TMP_surface"; multModel=1.; offsetModel=0.; units="deg K";mask="oceanonly"
           nameObs="sst_OSTIA";  varObs="sst_OSTIA"; ncvarObs="analysed_sst"; multObs=1.; offsetObs=0.
@@ -107,14 +97,14 @@ esac
            tag=$yyyy$mm${dd}
 
            #echo "$whereexp/$nameModelA/1p00/dailymean/${tag}/${varModel}.${nameModelA}.${tag}.dailymean.1p00.nc"
-           #echo $whereexp/$nameModelA/1p00/dailymean/${tag}/${varModel}.${nameModelA}.${tag}.dailymean.1p00.nc
-           #echo $whereexp/$nameModelB/1p00/dailymean/${tag}/${varModel}.${nameModelB}.${tag}.dailymean.1p00.nc
+
            if [ -f $whereexp/$nameModelA/1p00/dailymean/${tag}/${varModel}.${nameModelA}.${tag}.dailymean.1p00.nc ] ; then
               if [ -f $whereexp/$nameModelB/1p00/dailymean/${tag}/${varModel}.${nameModelB}.${tag}.dailymean.1p00.nc ] ; then
                   pathObs="$whereobs/$nameObs/1p00/dailymean"
                   if [ ! -d $pathObs ] ; then
                      pathObs="$whereobs/$nameObs/1p00/"
                   fi
+           #       echo $pathObs/${varObs}.day.mean.${tag}.1p00.nc
                   if [ -f $pathObs/${varObs}.day.mean.${tag}.1p00.nc ] ; then
 
                  case "${season}" in
@@ -372,7 +362,7 @@ cat << EOF > $nclscript
   ${nameModelB0}_diff@long_name="Bias" + " " + "${nameModelB}" + "; mean=" + ${nameModelB0}_aave 
   ${nameModelBA}_diff@long_name="Bias" + " " + "${nameModelBA}" + "; mean=" + ${nameModelBA}_aave 
 
-  plot=new(9,graphic)
+  plot=new(3,graphic)
 
   res                     = True
   if (isStrSubset("$domain","CONUS").or.isStrSubset("$domain","NAM").or.isStrSubset("$domain","IndoChina")) then
@@ -572,14 +562,21 @@ cat << EOF > $nclscript
        res2@cnLevels             = (/ -40., -20., -10.,-5.,-2., 2. ,5. ,10. ,20. , 40./)   ; set levels
   end if 
 
-  plot(0) = gsn_csm_contour_map(wks,${nameObs}_mean,res0)
+  ;plot(0) = gsn_csm_contour_map_polar(wks,${nameModelA0}_diff,res1)
+  ;plot(1) = gsn_csm_contour_map_polar(wks,${nameModelB0}_diff,res1)
 
-  plot(3) = gsn_csm_contour_map(wks,${nameModelA}_mean,res0)
-  plot(4) = gsn_csm_contour_map(wks,${nameModelA0}_diff,res1)
+  plot(0) = gsn_csm_contour_map(wks,${nameModelA0}_diff,res1)
+  plot(1) = gsn_csm_contour_map(wks,${nameModelB0}_diff,res1)
+  plot(2) = gsn_csm_contour_map(wks,${nameModelBA}_diff,res1)
 
-  plot(6) = gsn_csm_contour_map(wks,${nameModelB}_mean,res0)
-  plot(7) = gsn_csm_contour_map(wks,${nameModelB0}_diff,res1)
-  plot(8) = gsn_csm_contour_map(wks,${nameModelBA}_diff,res1)
+ ; plot(0) = gsn_csm_contour_map(wks,${nameObs}_mean,res0)
+
+ ; plot(3) = gsn_csm_contour_map(wks,${nameModelA}_mean,res0)
+ ; plot(4) = gsn_csm_contour_map(wks,${nameModelA0}_diff,res1)
+
+ ; plot(6) = gsn_csm_contour_map(wks,${nameModelB}_mean,res0)
+ ; plot(7) = gsn_csm_contour_map(wks,${nameModelB0}_diff,res1)
+ ; plot(8) = gsn_csm_contour_map(wks,${nameModelBA}_diff,res1)
 
 
   panelopts                   = True
@@ -593,8 +590,8 @@ cat << EOF > $nclscript
   panelopts@gsnPanelYWhiteSpacePercent = 0
   panelopts@gsnPanelXWhiteSpacePercent = 5
   panelopts@amJust   = "TopLeft"
-  ;gsn_panel(wks,plot,(/3,3/),panelopts)
-  gsn_panel(wks,plot,(/3,3,3/),panelopts)
+  gsn_panel(wks,plot,(/3/),panelopts)
+  ;gsn_panel(wks,plot,(/3,3,3/),panelopts)
 
 EOF
 
