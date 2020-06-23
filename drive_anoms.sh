@@ -11,6 +11,9 @@
 
    source graph_settings.sh 
 
+   exp_old=ufs_b31
+   exp_new=ufs_p4_base
+
    whereexp=$processed_root
    whereobs=$obs_root
 

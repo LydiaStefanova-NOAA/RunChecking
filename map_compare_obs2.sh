@@ -67,6 +67,14 @@ esac
           ncvarModel="TMIN_2maboveground"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
           nameObs="t2min_CPC";  varObs="tmin"; ncvarObs="tmin"; multObs=1.; offsetObs=273.15
        fi
+       if [ "$varModel" == "tmp2m" ] ; then
+          ncvarModel="TMP_2maboveground"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
+          nameObs="era5";  varObs="t2m"; ncvarObs="TMP_2maboveground"; multObs=1.; offsetObs=0.
+       fi
+       if [ "$varModel" == "t2m_fromminmax" ] ; then
+          ncvarModel="t2m_fromminmax"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
+          nameObs="t2m_from_minmax_CPC";  varObs="t2m_CPC"; ncvarObs="t2m"; multObs=1.; offsetObs=273.15
+       fi
        if [ "$varModel" == "tmpsfc" ] ; then
           ncvarModel="TMP_surface"; multModel=1.; offsetModel=0.; units="deg K";mask="oceanonly"
           nameObs="sst_OSTIA";  varObs="sst_OSTIA"; ncvarObs="analysed_sst"; multObs=1.; offsetObs=0.
@@ -356,11 +364,16 @@ cat << EOF > $nclscript
   ${nameObs}_mean@long_name=${nameModelA}_mean@long_name + " " + "${nameObs}" +"; mean=" + ${nameObs}_aave
   ${nameModelA}_mean@long_name=${nameModelA}_mean@long_name + " " + "${nameModelA}" +"; mean=" + ${nameModelA}_aave
   ${nameModelB}_mean@long_name=${nameModelB}_mean@long_name + " " + "${nameModelB}" +"; mean=" + ${nameModelB}_aave
-  ;${nameModelA0}_diff@long_name="Bias" + " " + "${nameModelA}" + "; mean=" + ${nameModelA0}_aave + "; rmsd=" + ${nameModelA}_rmsd
-  ;${nameModelB0}_diff@long_name="Bias" + " " + "${nameModelB}" + "; mean=" + ${nameModelB0}_aave + "; rmsd=" + ${nameModelB}_rmsd
-  ${nameModelA0}_diff@long_name="Bias" + " " + "${nameModelA}" + "; mean=" + ${nameModelA0}_aave 
-  ${nameModelB0}_diff@long_name="Bias" + " " + "${nameModelB}" + "; mean=" + ${nameModelB0}_aave 
-  ${nameModelBA}_diff@long_name="Bias" + " " + "${nameModelBA}" + "; mean=" + ${nameModelBA}_aave 
+  ${nameModelA0}_diff@long_name="Bias" + " " + "${nameModelA}" + "; mean=" + ${nameModelA0}_aave + "; rmsd=" + ${nameModelA}_rmsd
+  ${nameModelB0}_diff@long_name="Bias" + " " + "${nameModelB}" + "; mean=" + ${nameModelB0}_aave + "; rmsd=" + ${nameModelB}_rmsd
+  ${nameModelBA}_diff@long_name="Bias" + " " + "${nameModelBA}" + "; mean=" + ${nameModelBA}_aave + "; rmsd=" + ${nameModelBA}_rmsd
+  ;${nameModelA0}_diff@long_name="Bias" + " " + "${nameModelA}" + "; mean=" + ${nameModelA0}_aave 
+  ;${nameModelB0}_diff@long_name="Bias" + " " + "${nameModelB}" + "; mean=" + ${nameModelB0}_aave 
+  ;${nameModelBA}_diff@long_name="Bias" + " " + "${nameModelBA}" + "; mean=" + ${nameModelBA}_aave 
+
+  print (${nameModelA0}_diff@long_name)
+  print (${nameModelB0}_diff@long_name)
+  print (${nameModelBA}_diff@long_name)
 
   plot=new(3,graphic)
 

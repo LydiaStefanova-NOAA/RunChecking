@@ -41,7 +41,7 @@ done
 
 # ------------------ Generally, DO NOT CHANGE BELOW -----------------
 
-myarray=(land tmpsfc tmp2m t2min t2max ulwrftoa dlwrf dswrf ulwrf uswrf prate pwat icetk icec cloudbdry cloudlow cloudmid cloudhi snow weasd snod lhtfl shtfl pres u10 v10 uflx vflx soill01d soill14d soill41m soill12m tsoil01d tsoil14d tsoil41m tsoil12mo soilm02m)
+myarray=(land tmpsfc tmp2m t2min t2max ulwrftoa dlwrf dswrf ulwrf uswrf prate pwat icetk icec cloudbdry cloudlow cloudmid cloudhi snow weasd snod lhtfl shtfl pres u10 v10 uflx vflx soill01d soill14d soill41m soill12m tsoil01d tsoil14d tsoil41m tsoil12mo soilm02m sfcr)
 
 
 for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )); do
@@ -68,6 +68,9 @@ for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )); do
 
             aggregate="-daymean"
             tomatch2=""
+            if [ $varname == "sfcr" ] ; then
+               tomatch="SFCR:surface"; aggregate="-daymean"
+            fi
             if [ $varname == "land" ] ; then
                tomatch="LAND:surface"; aggregate="-daymean"
             fi

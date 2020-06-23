@@ -1,13 +1,7 @@
     # Start/end delimiters for initial conditions
-<<<<<<< HEAD
         ystart=2011; yend=2018;  ystep=1
         mstart=1;    mend=12;    mstep=1
         dstart=1;    dend=15;     dstep=14
-=======
-        ystart=2012; yend=2013;  ystep=1
-        mstart=1;    mend=12;    mstep=3
-        dstart=1;    dend=1;     dstep=14        # to use ICs starting on the 1st and 15th, set dstart=1; dend=15; dstep=14
->>>>>>> f397f9ad1194440814569d3595484e511e85020f
 
     # Name and location of experiment output on HPSS
 
@@ -15,13 +9,16 @@
         #sub=control_seed3
         #exp_new=ufs_b31_$sub      # name to assign to experiment ("." or "-" NOT OK in the name)
 
-        exp_old=ufs_b31
-        exp_new=ufs_b33
+        exp_new=ufs_p4_pre
+        hpss_root=/NCEPDEV/emc-climate/5year/Jessica.Meixner/WCOSS/scratch/preUFSp4/c384/
+        hpss_root=/NCEPDEV/emc-climate/5year/Jiande.Wang/WCOSS/scratch/preUFSp4/c384
 
-        #hpss_root=/NCEPDEV/emc-climate/5year/Jiande.Wang/WCOSS/benchmark3.1/c384/  # point to the location on hpss
-        #hpss_root=/NCEPDEV/emc-climate/1year/Lydia.B.Stefanova/HERA/scratch/$sub  # point to the location on hpss
 
-        hpss_root=/NCEPDEV/emc-climate/5year/Jiande.Wang/WCOSS/benchmark3.3/c384
+        #exp_new=ufs_p4_base
+        #hpss_root=/NCEPDEV/emc-climate/5year/Jessica.Meixner/WCOSS/scratch/UFSp4_base/c384/
+
+        #exp_new=heratest
+        #hpss_root=/NCEPDEV/emc-climate/1year/Jessica.Meixner/HERA/scratch/test_3d
 
     
         # Local directories for upload and storage of results

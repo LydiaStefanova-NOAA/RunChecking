@@ -1,8 +1,8 @@
 #!/bin/bash 
 #SBATCH --ntasks=1 -p service 
-#SBATCH -t 12:00:00 
+#SBATCH -q debug 
+#SBATCH -t 00:30:00 
 #SBATCH -A fv3-cpu
-#SBATCH -q batch 
 #SBATCH -J b31-getfiles
 
 module load hpss
