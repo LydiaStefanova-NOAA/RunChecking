@@ -7,17 +7,12 @@
 
 module load ncl
 
+
 for ARGUMENT in "$@"
 do
 
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
     VALUE=$(echo $ARGUMENT | cut -f2 -d=)
-
-    #ystart=2011
-    #yend=2018
-
-    #mstart=1
-    #mend=12
 
     case "$KEY" in
             whereexp)   whereexp=${VALUE} ;;
@@ -68,13 +63,14 @@ esac
           ncvarModel="TMIN_2maboveground"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
           nameObs="t2min_CPC";  varObs="tmin"; ncvarObs="tmin"; multObs=1.; offsetObs=273.15
        fi
+       if [ "$varModel" == "t2m_fromminmax" ] ; then
+          ncvarModel="t2m_fromminmax"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
+          nameObs="era5";  varObs="t2m"; ncvarObs="TMP_2maboveground"; multObs=1.; offsetObs=0.
+          nameObs="t2m_from_minmax_CPC";  varObs="t2m_CPC"; ncvarObs="t2m"; multObs=1.; offsetObs=273.15
+       fi
        if [ "$varModel" == "tmp2m" ] ; then
           ncvarModel="TMP_2maboveground"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
           nameObs="era5";  varObs="t2m"; ncvarObs="TMP_2maboveground"; multObs=1.; offsetObs=0.
-       fi
-       if [ "$varModel" == "t2m_fromminmax" ] ; then
-          ncvarModel="t2m_fromminmax"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
-          nameObs="t2m_from_minmax_CPC";  varObs="t2m_CPC"; ncvarObs="t2m"; multObs=1.; offsetObs=273.15
        fi
        if [ "$varModel" == "tmpsfc" ] ; then
           ncvarModel="TMP_surface"; multModel=1.; offsetModel=0.; units="deg K";mask="oceanonly"
@@ -82,29 +78,29 @@ esac
        fi
        if [ "$varModel" == "prate" ] ; then
           ncvarModel="PRATE_surface"; multModel=86400.; offsetModel=0.; units="mm/day"; mask="landonly"
-          #nameObs="pcp_CPC_Global";  varObs="rain"; ncvarObs="rain"; multObs=0.1; offsetObs=0.; mask="landonly"
           nameObs="pcp_TRMM";  varObs="pcp_TRMM"; ncvarObs="precipitation"; multObs=1; offsetObs=0.; mask="nomask"
        fi
        if [ "$varModel" == "ulwrftoa" ] ; then
           ncvarModel="ULWRF_topofatmosphere"; multModel=1.; offsetModel=0.; units="W/m^2"; mask="nomask"
 		  nameObs="olr_HRIS"; varObs="ulwrftoa"; ncvarObs="olr"; multObs=1.; offsetObs=0.; units="W/m^2"; mask="nomask"
        fi
-
- 
           nameModelBA=${nameModelB}_minus_${nameModelA}
           nameModelB0=${nameModelA}_minus_${nameObs}
           nameModelA0=${nameModelB}_minus_${nameObs}
 
+
+# Make list of files whose dates are in common between modelA and modelB, and match the specified season and date range
+# For each model (A or B), find the dates ($tag) that are common to both
+# List the full paths for files with this $tag for modelA, modelB, and OBS
+# Keep track of how many $tag are in common ($LENGTH)
+#
+# Provision for a single date: repeat in the list
+
        rm ${varModel}-${nameModelA}-list.txt ${varModel}-${nameModelB}-list.txt    # clean up from last time
        rm ${varModel}-${nameObs}-list.txt
 
-# The lines below create a list of files from experiments and OBS that 
-# (a) match the criteria defined above (range of years, months, days of IC), and
-# (b) are present in both sets of experiments 
-# There has to be a much more elegant way to do it, but it works for now. 
-
        LENGTH=0
-
+       pass=0
        for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )) ; do
        for (( mm1=$mstart; mm1<=$mend; mm1+=$mstep )) ; do
        for (( dd1=$dstart; dd1<=$dend; dd1+=$dstep )) ; do
@@ -120,7 +116,7 @@ esac
                   fi
                   if [ -f $pathObs/${varObs}.day.mean.${tag}.1p00.nc ] ; then
 
-                  case "${season}" in
+                 case "${season}" in
                       *"DJF"*)
                           if [ $mm1 -ge 12 ] || [ $mm1 -le 2 ] ; then
                              for nameModel in $nameModelA $nameModelB ; do
@@ -177,7 +173,7 @@ esac
        done
        done
        done
-   truelength=$LENGTH
+   truelength=$LENGTH        # Provision for when a single date ($tag) is in common - repeat in list, report "$truelength"
    if [ $LENGTH -eq 1 ] ; then
                              for nameModel in $nameModelA $nameModelB ; do
                               cat ${varModel}-${nameModel}-list.txt ${varModel}-${nameModel}-list.txt > tmp.txt
@@ -189,11 +185,15 @@ esac
    fi
    echo "A total of $truelength ICs are being processed"
 
+# END making list
 
    LENGTHm1="$(($LENGTH-1))"                        # Needed for counters starting at 0
+
    ic1=0; ic2=$LENGTHm1 ; startname="${truelength}ICs"  # Glom together all ICs
    d1p1="$(($d1+1))"                                #  (counter starting at 1)
    d2p1="$(($d2+1))"
+
+
 
 ###################################################################################################
 #                                            Create ncl script
@@ -262,24 +262,31 @@ cat << EOF > $nclscript
      end if 
   end if
 
-  lat_0 = ${nameModelA}_lat_0(0,{${latS}:${latN}})
-  lon_0 = ${nameModelA}_lon_0(0,{${lonW}:${lonE}})
-
-
-; record keeping, not used
   timeObs = ${nameObs}_add[:]->time
   timeModel = ${nameModelA}_add[:]->time
   dateObs=cd_calendar(timeObs,3)
   dateModel=cd_calendar(timeModel,3)
+
+  ;print(dimsizes(dateObs))
+
+  ;print(dateObs)
+  ;print(getvardimnames(${nameObs}_fld))
+
+
+  lat_0 = ${nameModelA}_lat_0(0,{${latS}:${latN}})
+  lon_0 = ${nameModelA}_lon_0(0,{${lonW}:${lonE}})
   nlon=dimsizes(lon_0)
   nlat=dimsizes(lat_0)
   timesize=dimsizes(timeObs)
+
   nstarts=timesize(0)
   ndays=timesize(1)
 
+  
 
 ; Mean maps
 
+ 
   ${nameModelA}_mean=dim_avg_n_Wrap(${nameModelA}_fld($ic1:$ic2,$d1:$d2,{${latS}:${latN}},{${lonW}:${lonE}}),(/0,1/))
   ${nameModelB}_mean=dim_avg_n_Wrap(${nameModelB}_fld($ic1:$ic2,$d1:$d2,{${latS}:${latN}},{${lonW}:${lonE}}),(/0,1/))
   ${nameObs}_mean=dim_avg_n_Wrap(${nameObs}_fld($ic1:$ic2,$d1:$d2,{${latS}:${latN}},{${lonW}:${lonE}}),(/0,1/))
@@ -304,7 +311,6 @@ cat << EOF > $nclscript
     ${nameModelB0}_diff=where(ismissing(masker),${nameModelB0}_diff,${nameModelB0}_diff@_FillValue)
     ${nameModelBA}_diff=where(ismissing(masker),${nameModelBA}_diff,${nameModelBA}_diff@_FillValue)
   end if 
-
   if isStrSubset("$mask","oceanonly") then
     ${nameModelA}_mean=where(.not.ismissing(masker),${nameModelA}_mean,${nameModelA}_mean@_FillValue)
     ${nameModelB}_mean=where(.not.ismissing(masker),${nameModelB}_mean,${nameModelB}_mean@_FillValue)
@@ -364,16 +370,20 @@ cat << EOF > $nclscript
   ${nameObs}_mean@long_name=${nameModelA}_mean@long_name + " " + "${nameObs}" +"; mean=" + ${nameObs}_aave
   ${nameModelA}_mean@long_name=${nameModelA}_mean@long_name + " " + "${nameModelA}" +"; mean=" + ${nameModelA}_aave
   ${nameModelB}_mean@long_name=${nameModelB}_mean@long_name + " " + "${nameModelB}" +"; mean=" + ${nameModelB}_aave
-  ${nameModelA0}_diff@long_name="Bias" + " " + "${nameModelA}" + "; mean=" + ${nameModelA0}_aave + "; rmsd=" + ${nameModelA}_rmsd
-  ${nameModelB0}_diff@long_name="Bias" + " " + "${nameModelB}" + "; mean=" + ${nameModelB0}_aave + "; rmsd=" + ${nameModelB}_rmsd
-  ${nameModelBA}_diff@long_name="Bias" + " " + "${nameModelBA}" + "; mean=" + ${nameModelBA}_aave + "; rmsd=" + ${nameModelBA}_rmsd
+  ;${nameModelA0}_diff@long_name="Bias" + " " + "${nameModelA}" + "; mean=" + ${nameModelA0}_aave + "; rmsd=" + ${nameModelA}_rmsd
+  ;${nameModelB0}_diff@long_name="Bias" + " " + "${nameModelB}" + "; mean=" + ${nameModelB0}_aave + "; rmsd=" + ${nameModelB}_rmsd
+  ${nameModelA0}_diff@long_name="Bias" + " " + "${nameModelA}" + "; mean=" + ${nameModelA0}_aave 
+  ${nameModelB0}_diff@long_name="Bias" + " " + "${nameModelB}" + "; mean=" + ${nameModelB0}_aave 
+  ${nameModelBA}_diff@long_name="Bias" + " " + "${nameModelBA}" + "; mean=" + ${nameModelBA}_aave 
 
   print (${nameModelA0}_diff@long_name)
   print (${nameModelB0}_diff@long_name)
   print (${nameModelBA}_diff@long_name)
 
+  plot=new(9,graphic)
 
-  loadscript("NCL/basicres.ncl")
+
+  loadscript("../../ncl/basicres.ncl")
 
   if (isStrSubset("$domain","CONUS").or.isStrSubset("$domain","NAM").or.isStrSubset("$domain","IndoChina")) then
      res@gsnAddCyclic        = False
@@ -383,21 +393,22 @@ cat << EOF > $nclscript
   res1=res
   res2=res
 
-  loadscript("NCL/setcolors.ncl")
-  setcolors("${varModel}")
+  loadscript("../../ncl/setcolors.ncl")
+  setcolors("{$varModel}")
 
+  plot(0) = gsn_csm_contour_map(wks,${nameObs}_mean,res0)
 
-  plot=new(3,graphic)
+  plot(3) = gsn_csm_contour_map(wks,${nameModelA}_mean,res0)
+  plot(4) = gsn_csm_contour_map(wks,${nameModelA0}_diff,res1)
 
-  plot(0) = gsn_csm_contour_map(wks,${nameModelA0}_diff,res1)
-  plot(1) = gsn_csm_contour_map(wks,${nameModelB0}_diff,res1)
-  plot(2) = gsn_csm_contour_map(wks,${nameModelBA}_diff,res1)
+  plot(6) = gsn_csm_contour_map(wks,${nameModelB}_mean,res0)
+  plot(7) = gsn_csm_contour_map(wks,${nameModelB0}_diff,res1)
+  plot(8) = gsn_csm_contour_map(wks,${nameModelBA}_diff,res1)
 
-
-  loadscript("NCL/panelopts.ncl")
-
+  loadscript("../../ncl/panelopts.ncl")
   panelopts@gsnPanelMainString = "${varModel}, $season, day ${d1p1} - day ${d2p1},  $truelength ICs"
-  gsn_panel(wks,plot,(/3/),panelopts)
+
+  gsn_panel(wks,plot,(/3,3,3/),panelopts)
 
 EOF
 

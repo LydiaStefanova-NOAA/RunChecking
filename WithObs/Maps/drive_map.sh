@@ -24,10 +24,13 @@
 
     # Other specitications
 
-        mapscript=map_compare_obs2.sh    # choices map_compare_obs.sh, map_compare_noobs.sh, map_compare_polar.sh
+
+        nplots=3      #valid choices are 9 or 3  
+   
+        mapscript=map_compare_obs.sh    # choices map_compare_obs.sh, map_compare_noobs.sh, map_compare_polar.sh
         hardcopy=no         # Valid choices are yes no      
         domain=Global       # Valid choices see [case "$domain" list] in mapping script
-                            # NB: keep in mind that verifying obs for tmpsfc (OSTIA SST) are not valid in ice-covered areas
+                            # NB: keep in mind that verifying obs for tmpsfc (OSTIA SST) are not valid for ice-covered areas because tmpsfc there is not sst
         
         declare -a varlist=( "prate" )            # Valid choices for comparison with OBS are "tmpsfc" "prate" "ulwrftoa" "tmp2m" "t2min" "t2max" 
         declare -a seasonlist=( "DJF" "JJA" )     # Valid choices are "DJF" "MAM" "JJA" "SON" "AllAvailable"
@@ -36,9 +39,9 @@
         for season in ${seasonlist[@]} ; do
         for varname in ${varlist[@]}; do
 
-        for day in 1 2 3 4 5 ; do
+        for day in 1  ; do
             echo "using $mapscript"
-            bash $mapscript whereexp=$whereexp  whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new ystart=$ystart yend=$yend ystep=$ystep  mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep d1=$day d2=$day
+            bash $mapscript whereexp=$whereexp  whereobs=$whereobs varModel=$varname domain=$domain hardcopy=$hardcopy season=$season nameModelA=$exp_old nameModelB=$exp_new ystart=$ystart yend=$yend ystep=$ystep  mstart=$mstart mend=$mend mstep=$mstep dstart=$dstart dend=$dend dstep=$dstep d1=$day d2=$day  nplots=$nplots
    done
 done
 done
