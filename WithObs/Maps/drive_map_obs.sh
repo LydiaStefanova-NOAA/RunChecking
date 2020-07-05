@@ -26,8 +26,7 @@
 
 
         nplots=3      #valid choices are 9 or 3  
-   
-        mapscript=map_compare_obs.sh    # choices map_compare_obs.sh, map_compare_noobs.sh, map_compare_polar.sh
+        mapscript=map_compare_obs.sh    
         hardcopy=no         # Valid choices are yes no      
         domain=Global       # Valid choices see [case "$domain" list] in mapping script
                             # NB: keep in mind that verifying obs for tmpsfc (OSTIA SST) are not valid for ice-covered areas because tmpsfc there is not sst
