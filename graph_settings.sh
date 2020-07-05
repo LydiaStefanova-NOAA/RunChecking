@@ -4,7 +4,7 @@
    source common_settings.sh   
    
   
-   hardcopy=yes         # Valid choices are yes no      
+   hardcopy=no         # Valid choices are yes no      
    domain=Global       # Valid choices see line 47 (case "$domain" list) in map_compare_obs.sh
                          # NB: keep in mind that verifying obs for tmpsfc (OSTIA SST) are not valid in ice-covered areas
         

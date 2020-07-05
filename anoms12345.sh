@@ -6,34 +6,29 @@
 #SBATCH -t 120               # -t specifies walltime in minutes; if in debug, cannot be more than 30
 
 # (proper RMSe calculation version)
-# Creates and runs ncl script with given specifications for paths, names, and preferences
-#
-# The result is a four-panel plot with time series of a) area mean, b) area mean bias, c) raw RMS, d) bias-corrected RMS
-
 
 for ARGUMENT in "$@"
 do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
     VALUE=$(echo $ARGUMENT | cut -f2 -d=)
     case "$KEY" in
-            whereexp)   whereexp=${VALUE} ;;             # path to models
-            whereobs)   whereobs=${VALUE} ;;             # path to OBS
-            hardcopy)   hardcopy=${VALUE} ;;             # yes/no hardcopy
-            domain)     domain=${VALUE} ;;               # choice of preset domains
-            varModel)   varModel=${VALUE} ;;             # model variable name
-            season)     season=${VALUE} ;;               # choice of DJF, MAM, JJA, SON
-            nameModelA) nameModelA=${VALUE} ;;           # name of first experiment
-            nameModelB) nameModelB=${VALUE} ;;           # name of second experiment
-            ystart)     ystart=${VALUE} ;;               # first year to consider
-            yend)       yend=${VALUE} ;;                 # last year to consider
-            ystep)      ystep=${VALUE} ;;                 # last year to consider
-            mstart)     mstart=${VALUE} ;;               # first month to consider
-            mend)       mend=${VALUE} ;;                 # last month to consider
-            mstep)      mstep=${VALUE} ;;                # interval between months to consider
-            dstart)     dstart=${VALUE} ;;               # first month to consider
-            dend)       dend=${VALUE} ;;                 # last month to consider
-            dstep)      dstep=${VALUE} ;;                # interval between months to consider
-            mask)       mask=${VALUE} ;;             # oceanonly/landonly/none
+            whereexp)   whereexp=${VALUE} ;;
+            whereobs)   whereobs=${VALUE} ;;
+            hardcopy)   hardcopy=${VALUE} ;;
+            domain)     domain=${VALUE} ;;  
+            varModel)   varModel=${VALUE} ;;   
+            season)     season=${VALUE} ;;   
+            nameModelA) nameModelA=${VALUE} ;;
+            nameModelB) nameModelB=${VALUE} ;;
+            nameModelC) nameModelC=${VALUE} ;;
+            nameModelD) nameModelD=${VALUE} ;;
+            nameModelE) nameModelE=${VALUE} ;;
+            ystart)     ystart=${VALUE} ;;
+            yend)       yend=${VALUE} ;;
+            mstart)     mstart=${VALUE} ;;
+            mend)       mend=${VALUE} ;;
+            mstep)      mstep=${VALUE} ;;
+            realmask)   realmask=${VALUE} ;;
             *)
     esac
 done
@@ -48,115 +43,117 @@ case "$domain" in
     "CONUS") latS="25"; latN="60" ;  lonW="210" ; lonE="300" ;;
     "NAM") latS="0"; latN="90" ;  lonW="180" ; lonE="360" ;;
     "IndoChina") latS="-20"; latN="40" ;  lonW="30" ; lonE="150" ;;
-    "NP") latS="50"; latN="90" ;  lonW="0" ; lonE="360" ;;
-    "SP") latS="-90"; latN="-50" ;  lonW="0" ; lonE="360" ;;
+    "NH") latS="50"; latN="90" ;  lonW="0" ; lonE="360" ;;
+    "SH") latS="-90"; latN="-50" ;  lonW="0" ; lonE="360" ;;
     "DatelineEq") latS="-1"; latN="1" ;  lonW="179" ; lonE="181" ;;
     *)
 esac
 
-       mask=$mask
        if [ "$varModel" == "t2max" ] ; then
-          ncvarModel="TMAX_2maboveground"; multModel=1.; offsetModel=0.; units="deg K"
+          ncvarModel="TMAX_2maboveground"; multModel=1.; offsetModel=0.; units="deg K"; mask="landonly"
           nameObs="t2max_CPC";  varObs="tmax"; ncvarObs="tmax"; multObs=1.; offsetObs=273.15
        fi
        if [ "$varModel" == "t2min" ] ; then
-          ncvarModel="TMIN_2maboveground"; multModel=1.; offsetModel=0.; units="deg K"
+          ncvarModel="TMIN_2maboveground"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
           nameObs="t2min_CPC";  varObs="tmin"; ncvarObs="tmin"; multObs=1.; offsetObs=273.15
        fi
        if [ "$varModel" == "tmpsfc" ] ; then
-          ncvarModel="TMP_surface"; multModel=1.; offsetModel=0.; units="deg K"
+          ncvarModel="TMP_surface"; multModel=1.; offsetModel=0.; units="deg K";mask="oceanonly"
           nameObs="sst_OSTIA";  varObs="sst_OSTIA"; ncvarObs="analysed_sst"; multObs=1.; offsetObs=0.
        fi
        if [ "$varModel" == "prate" ] ; then
-          ncvarModel="PRATE_surface"; multModel=86400.; offsetModel=0.; units="mm/day"
-          nameObs="pcp_CPC_Global";  varObs="rain"; ncvarObs="rain"; multObs=0.1; offsetObs=0.
-          nameObs="pcp_TRMM";  varObs="pcp-TRMM"; ncvarObs="precipitation"; multObs=1; offsetObs=0.
+          ncvarModel="PRATE_surface"; multModel=86400.; offsetModel=0.; units="mm/day"; mask="landonly"
+          nameObs="pcp_CPC_Global";  varObs="rain"; ncvarObs="rain"; multObs=0.1; offsetObs=0.; mask="landonly"
+          nameObs="pcp_TRMM";  varObs="pcp-TRMM"; ncvarObs="precipitation"; multObs=1; offsetObs=0.; mask="oceanonly"
        fi
        if [ "$varModel" == "ulwrftoa" ] ; then
-          ncvarModel="ULWRF_topofatmosphere"; multModel=1.; offsetModel=0.; units="W/m^2"
-          nameObs="olr_HRIS"; varObs="ulwrftoa"; ncvarObs="olr"; multObs=1.; offsetObs=0.; units="W/m^2"
+          ncvarModel="ULWRF_topofatmosphere"; multModel=1.; offsetModel=0.; units="W/m^2"; mask="nomask"
+          nameObs="olr_HRIS"; varObs="ulwrftoa"; ncvarObs="olr"; multObs=1.; offsetObs=0.; units="W/m^2"; mask="oceanonly"
        fi
+       mask=$realmask
 
-# Names for the anomaly arrays
-       nameModelBA=${nameModelB}_minus_${nameModelA}
-       nameModelA0=${nameModelA}_minus_${nameObs}
-       nameModelB0=${nameModelB}_minus_${nameObs}
+          nameModelBA=${nameModelB}_minus_${nameModelA}
+          nameModelA0=${nameModelA}_minus_${nameObs}
+          nameModelB0=${nameModelB}_minus_${nameObs}
+          nameModelC0=${nameModelC}_minus_${nameObs}
+          nameModelD0=${nameModelD}_minus_${nameObs}
+          nameModelE0=${nameModelE}_minus_${nameObs}
  
-# Clean up file listings from last time
-    
-       if [ -f ${varModel}-${nameModelA}-list.txt ] ; then rm ${varModel}-${nameModelA}-list.txt ; fi
-       if [ -f ${varModel}-${nameModelB}-list.txt ] ; then rm ${varModel}-${nameModelB}-list.txt ; fi
-       if [ -f ${varModel}-${nameObs}-list.txt ] ; then rm ${varModel}-${nameObs}-list.txt ; fi
+        echo $nameModelA0 $nameModelB0 $nameModelC0 $nameModelD0 $nameModelE0
 
-# Create file listings from which to read matching dates for model and obs data
+       rm ${varModel}-${nameModelA}-list.txt ${varModel}-${nameModelB}-list.txt    # clean up from last time
+       rm ${varModel}-${nameModelC}-list.txt ${varModel}-${nameModelD}-list.txt    # clean up from last time
+       rm ${varModel}-${nameModelE}-list.txt ${varModel}-${nameObs}-list.txt
 
-       LENGTH=0   # Total length of each file listing
-
-       for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep ))  ; do
+       LENGTH=0
+       pass=0
+       for (( yyyy=$ystart; yyyy<=$yend; yyyy+=1 ))  ; do
        for (( mm1=$mstart; mm1<=$mend; mm1+=$mstep )) ; do
-       for (( dd1=$dstart; dd1<=$dend; dd1+=$dstep )) ; do
+       for dd1 in {1..15..14} ; do
            mm=$(printf "%02d" $mm1)
            dd=$(printf "%02d" $dd1)
            tag=$yyyy$mm${dd}
+           #echo "$whereexp/$nameModelA/1p00/dailymean/${tag}/${varModel}.${nameModelA}.${tag}.dailymean.1p00.nc"
+           #echo "$whereexp/$nameModelB/1p00/dailymean/${tag}/${varModel}.${nameModelB}.${tag}.dailymean.1p00.nc"
+           #echo "$whereexp/$nameModelC/1p00/dailymean/${tag}/${varModel}.${nameModelC}.${tag}.dailymean.1p00.nc"
+           #echo "$whereobs/$nameObs/1p00/dailymean"
            if [ -f $whereexp/$nameModelA/1p00/dailymean/${tag}/${varModel}.${nameModelA}.${tag}.dailymean.1p00.nc ] ; then
               if [ -f $whereexp/$nameModelB/1p00/dailymean/${tag}/${varModel}.${nameModelB}.${tag}.dailymean.1p00.nc ] ; then
                   pathObs="$whereobs/$nameObs/1p00/dailymean"
                   if [ "$nameObs" == "pcp_TRMM" ] ;  then
                       pathObs="$whereobs/$nameObs/1p00"
                   fi
-                  #echo "yes" $pathObs/${varObs}.day.mean.${tag}.1p00.nc
-
+                  echo "yes" $pathObs/${varObs}.day.mean.${tag}.1p00.nc
                   if [ -f $pathObs/${varObs}.day.mean.${tag}.1p00.nc ] ; then
-                   
-                   
-                  case "${season}" in
+
+                 case "${season}" in
                       *"DJF"*)
                           if [ $mm1 -ge 12 ] || [ $mm1 -le 2 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
+                             for nameModel in $nameModelA $nameModelB $nameModelC $nameModelD $nameModelE ; do
                                  pathModel="$whereexp/$nameModel/1p00/dailymean"
                                  ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
                              done
 	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                       
+                                 LENGTH="$(($LENGTH+1))"                       # How many ICs are considered
                           fi
                       ;;
                       *"MAM"*)
                           if [ $mm1 -ge 3 ] && [ $mm1 -le 5 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
+                             for nameModel in $nameModelA $nameModelB $nameModelC $nameModelD $nameModelE ; do
                                  pathModel="$whereexp/$nameModel/1p00/dailymean"
                                  ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
                              done
 	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                      
+                                 LENGTH="$(($LENGTH+1))"                       # How many ICs are considered
                           fi
                       ;;
                       *"JJA"*)
                           if [ $mm1 -ge 6 ] && [ $mm1 -le 8 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
+                             for nameModel in $nameModelA $nameModelB $nameModelC $nameModelD $nameModelE ; do
                                  pathModel="$whereexp/$nameModel/1p00/dailymean"
                                  ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
                              done
 	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                     
+                                 LENGTH="$(($LENGTH+1))"                       # How many ICs are considered
                           fi
                       ;;
                       *"SON"*)
                           if [ $mm1 -ge 9 ] && [ $mm1 -le 11 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
+                             for nameModel in $nameModelA $nameModelB $nameModelC $nameModelD $nameModelE ; do
                                  pathModel="$whereexp/$nameModel/1p00/dailymean"
                                  ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
                              done
 	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                   
+                                 LENGTH="$(($LENGTH+1))"                       # How many ICs are considered
                           fi
                       ;;
                       *"AllAvailable"*)
-                             for nameModel in $nameModelA $nameModelB ; do
+                             for nameModel in $nameModelA $nameModelB $nameModelC $nameModelD $nameModelE ; do
                                  pathModel="$whereexp/$nameModel/1p00/dailymean"
                                  ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
                              done
 	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                  
+                                 LENGTH="$(($LENGTH+1))"                       # How many ICs are considered
                       ;;
                  esac
 
@@ -169,10 +166,10 @@ esac
 
    echo "A total of $LENGTH ICs are being processed"
    truelength=$LENGTH
-
+echo "landmask: $whereexp/$nameModelA/1p00/dailymean/20120101/land.${nameModelA}.20120101.dailymean.1p00.nc"
 # The if below takes care of the situation where there is a single IC by listing it twice (so that it can still be read with "addfiles")
    if [ $LENGTH -eq 1 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
+                             for nameModel in $nameModelA $nameModelB $nameModelC $nameModelD $nameModelE ; do
                               cat ${varModel}-${nameModel}-list.txt ${varModel}-${nameModel}-list.txt > tmp.txt
                               mv tmp.txt ${varModel}-${nameModel}-list.txt
                              done
@@ -181,12 +178,10 @@ esac
                                  LENGTH="$(($LENGTH+1))"                       # How many ICs are considered
    fi
 #
-
    echo "A total of $truelength ICs are being processed"
-
    LENGTHm1="$(($LENGTH-1))"                          # Needed for counters starting at 0
-   s1=0; s2=$LENGTHm1                                 # Glom together all ICs
-   d1=0; d2=34                                        # from day=d1 to day=d1 (counter starting at 0)
+   s1=0; s2=$LENGTHm1 ; startname="${truelength}ICs"  # Glom together all ICs
+   d1=1; d2=34                                        # from day=d1 to day=d1 (counter starting at 0)
    d1p1="$(($d1+1))"                                  # day1 (counter starting at 1)
    d2p1="$(($d2+1))"                                  # day2 (counter starting at 1)
 
@@ -194,8 +189,8 @@ esac
 #                                            Create ncl script
 ###################################################################################################
 
-nclscript="linermse12_${season}.ncl"                         # Name for the NCL script to be created
-
+echo $iclist
+nclscript="linermse12345_${season}.ncl"                         # Name for the NCL script to be created
 cat << EOF > $nclscript
 
   if isStrSubset("$hardcopy","yes") then
@@ -208,7 +203,7 @@ cat << EOF > $nclscript
      wks_type@wkHeight            = 800
   end if 
 
-  wks                          = gsn_open_wks(wks_type,"rmse.${varModel}.${nameModelA}.${nameModelB}.${season}.${ystart}-${yend}.${truelength}IC.$domain.$mask")
+  wks                          = gsn_open_wks(wks_type,"rmse.${varModel}.${nameModelA}.${nameModelB}.${nameModelC}.${nameModelD}.${nameModelE}.${season}.${startname}.$domain.$mask")
 
   latStart=${latS}
   latEnd=${latN}
@@ -220,125 +215,153 @@ cat << EOF > $nclscript
      lonEnd=390
   end if
 
-  
-  ${nameModelA}_list=systemfunc ("if [ -f  ${varModel}-${nameModelA}-list.txt ] ; then awk  '{print} NR==${LENGTH}{exit}' ${varModel}-${nameModelA}-list.txt } ; fi") 
-  ${nameModelB}_list=systemfunc ("if [ -f  ${varModel}-${nameModelB}-list.txt ] ; then awk  '{print} NR==${LENGTH}{exit}' ${varModel}-${nameModelB}-list.txt } ; fi") 
+
+  ${nameModelA}_list=systemfunc ("awk  '{print} NR==${LENGTH}{exit}' ${varModel}-${nameModelA}-list.txt }") 
+  ${nameModelB}_list=systemfunc ("awk  '{print} NR==${LENGTH}{exit}' ${varModel}-${nameModelB}-list.txt }") 
+  ${nameModelC}_list=systemfunc ("awk  '{print} NR==${LENGTH}{exit}' ${varModel}-${nameModelC}-list.txt }") 
+  ${nameModelD}_list=systemfunc ("awk  '{print} NR==${LENGTH}{exit}' ${varModel}-${nameModelD}-list.txt }") 
+  ${nameModelE}_list=systemfunc ("awk  '{print} NR==${LENGTH}{exit}' ${varModel}-${nameModelE}-list.txt }") 
   ${nameObs}_list=systemfunc ("awk  '{print} NR==${LENGTH}{exit}' ${varModel}-${nameObs}-list.txt }") 
 
   ${nameModelA}_add = addfiles (${nameModelA}_list, "r")   ; note the "s" of addfile
   ${nameModelB}_add = addfiles (${nameModelB}_list, "r")   
+  ${nameModelC}_add = addfiles (${nameModelC}_list, "r")   
+  ${nameModelD}_add = addfiles (${nameModelD}_list, "r")   
+  ${nameModelE}_add = addfiles (${nameModelE}_list, "r")   
   ${nameObs}_add = addfiles (${nameObs}_list, "r")   
 
-;---Use the landmask in ${nameModelA} to define land or ocean
-;   Note that 1 is land, 0 is ocean, 2 is ice-covered ocean
-;   variable "masker" is set to fill value over land
+  maskMod=addfile("$whereexp/$nameModelA/1p00/dailymean/20120101/land.${nameModelA}.20120101.dailymean.1p00.nc", "r")
 
-  mask_add=addfile("$whereexp/$nameModelB/1p00/dailymean/20120101/land.${nameModelB}.20120101.dailymean.1p00.nc", "r")
-  masker=mask_add->LAND_surface(0,:,:)
-  masker=where(masker.ne.1,masker,masker@_FillValue)   
+  masker=maskMod->LAND_surface(0,:,:)
+  masker=where(masker.lt.1,masker,masker@_FillValue)
 
 
-;---Read variables in "join" mode 
+;---Read variables in "join" mode and print a summary of the variable
 
   ListSetType (${nameModelA}_add, "join") 
   ListSetType (${nameModelB}_add, "join") 
+  ListSetType (${nameModelC}_add, "join") 
+  ListSetType (${nameModelD}_add, "join") 
+  ListSetType (${nameModelE}_add, "join") 
   ListSetType (${nameObs}_add, "join") 
    
-
   ${nameModelA}_lat_0=${nameModelA}_add[:]->latitude
   ${nameModelA}_lon_0=${nameModelA}_add[:]->longitude
 
   ${nameModelA}_fld = ${nameModelA}_add[:]->${ncvarModel}
   ${nameModelB}_fld = ${nameModelB}_add[:]->${ncvarModel}
-
-;---Special provision for OSTIA which is written in short format
+  ${nameModelC}_fld = ${nameModelC}_add[:]->${ncvarModel}
+  ${nameModelD}_fld = ${nameModelD}_add[:]->${ncvarModel}
+  ${nameModelE}_fld = ${nameModelE}_add[:]->${ncvarModel}
 
   if isStrSubset("$nameObs","sst_OSTIA") then
      ${nameObs}_fld = short2flt(${nameObs}_add[:]->${ncvarObs})
   else
-
-;---Special provision for TRMM which has a different ordering of dimensions
-
      if isStrSubset("$nameObs","TRMM") then
   
        ${nameObs}_fld_toflip = ${nameObs}_add[:]->${ncvarObs}
        ${nameObs}_fld = ${nameObs}_fld_toflip(ncl_join|:,time|:,lat|:,lon|:)
      else
-
-;---No special provision for other OBS
-
      ${nameObs}_fld = ${nameObs}_add[:]->${ncvarObs}
      end if 
   end if
 
-;---Adjust scaling and offset  
+
+  lat_0 = ${nameModelA}_lat_0(0,{${latS}:${latN}})
+  lon_0 = ${nameModelA}_lon_0(0,{${lonW}:${lonE}})
+  nlon=dimsizes(lon_0)
+  nlat=dimsizes(lat_0)
+
+  dimsObs=getvardims(${nameObs}_fld)
+  dimsModel=getvardims(${nameModelA}_fld)
+
+; Mask out 
 
   ${nameModelA}_fld=${nameModelA}_fld*${multModel} + 1.*($offsetModel)
   ${nameModelB}_fld=${nameModelB}_fld*${multModel} + 1.*($offsetModel)
+  ${nameModelC}_fld=${nameModelC}_fld*${multModel} + 1.*($offsetModel)
+  ${nameModelD}_fld=${nameModelD}_fld*${multModel} + 1.*($offsetModel)
+  ${nameModelE}_fld=${nameModelE}_fld*${multModel} + 1.*($offsetModel)
   ${nameObs}_fld=${nameObs}_fld*${multObs} + 1.*($offsetObs)
-
-;---Apply mask
 
   maskerbig=conform_dims(dimsizes(${nameModelA}_fld),masker,(/2,3/))
   if isStrSubset("$mask","landonly") then
     ${nameObs}_fld=where(ismissing(maskerbig),${nameObs}_fld,${nameObs}_fld@_FillValue)
     ${nameModelA}_fld=where(ismissing(maskerbig),${nameModelA}_fld,${nameModelA}_fld@_FillValue)
     ${nameModelB}_fld=where(ismissing(maskerbig),${nameModelB}_fld,${nameModelB}_fld@_FillValue)
+    ${nameModelC}_fld=where(ismissing(maskerbig),${nameModelC}_fld,${nameModelC}_fld@_FillValue)
+    ${nameModelD}_fld=where(ismissing(maskerbig),${nameModelD}_fld,${nameModelD}_fld@_FillValue)
+    ${nameModelE}_fld=where(ismissing(maskerbig),${nameModelE}_fld,${nameModelE}_fld@_FillValue)
   end if 
   if isStrSubset("$mask","oceanonly") then
     ${nameObs}_fld=where(.not.ismissing(maskerbig),${nameObs}_fld,${nameObs}_fld@_FillValue)
     ${nameModelA}_fld=where(.not.ismissing(maskerbig),${nameModelA}_fld,${nameModelA}_fld@_FillValue)
     ${nameModelB}_fld=where(.not.ismissing(maskerbig),${nameModelB}_fld,${nameModelB}_fld@_FillValue)
+    ${nameModelC}_fld=where(.not.ismissing(maskerbig),${nameModelC}_fld,${nameModelC}_fld@_FillValue)
+    ${nameModelD}_fld=where(.not.ismissing(maskerbig),${nameModelD}_fld,${nameModelD}_fld@_FillValue)
+    ${nameModelE}_fld=where(.not.ismissing(maskerbig),${nameModelE}_fld,${nameModelE}_fld@_FillValue)
   end if 
 
-;---Specify dimensions of lat/lon as specified in $domain
-
-  lat_0 = ${nameModelA}_lat_0(0,{${latS}:${latN}})
-  lon_0 = ${nameModelA}_lon_0(0,{${lonW}:${lonE}})
-  nlon=dimsizes(lon_0)
-  nlat=dimsizes(lat_0)
-  dimsObs=getvardims(${nameObs}_fld)
-  dimsModel=getvardims(${nameModelA}_fld)
-
-;---Limit extent according to the domain specifications
+; limit extent
 
   ${nameObs}_small=${nameObs}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}})
   ${nameModelA}_small=${nameModelA}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}})
   ${nameModelB}_small=${nameModelB}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}})
+  ${nameModelC}_small=${nameModelC}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}})
+  ${nameModelD}_small=${nameModelD}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}})
+  ${nameModelE}_small=${nameModelE}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}})
 
-;---Calculate mean maps
+; Mean maps
 
   ${nameModelA}_mean=dim_avg_n_Wrap(${nameModelA}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}}),(/0/))
   ${nameModelB}_mean=dim_avg_n_Wrap(${nameModelB}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}}),(/0/))
+  ${nameModelC}_mean=dim_avg_n_Wrap(${nameModelC}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}}),(/0/))
+  ${nameModelD}_mean=dim_avg_n_Wrap(${nameModelD}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}}),(/0/))
+  ${nameModelE}_mean=dim_avg_n_Wrap(${nameModelE}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}}),(/0/))
   ${nameObs}_mean=dim_avg_n_Wrap(${nameObs}_fld($s1:$s2,:,{${latS}:${latN}},{${lonW}:${lonE}}),(/0/))
-
-;---Calculate anomaly maps 
   
   ${nameObs}_anom=${nameObs}_small
   ${nameModelA}_anom=${nameModelA}_small
   ${nameModelB}_anom=${nameModelB}_small
+  ${nameModelC}_anom=${nameModelC}_small
+  ${nameModelD}_anom=${nameModelD}_small
+  ${nameModelE}_anom=${nameModelE}_small
 
   ${nameObs}_anom=${nameObs}_small-conform_dims(dimsizes(${nameObs}_small),${nameObs}_mean, (/1,2,3/))
   ${nameModelA}_anom=${nameModelA}_small-conform_dims(dimsizes(${nameModelA}_small),${nameModelA}_mean, (/1,2,3/))
   ${nameModelB}_anom=${nameModelB}_small-conform_dims(dimsizes(${nameModelB}_small),${nameModelB}_mean, (/1,2,3/))
-
-;---Calculate bias maps
+  ${nameModelC}_anom=${nameModelC}_small-conform_dims(dimsizes(${nameModelC}_small),${nameModelC}_mean, (/1,2,3/))
+  ${nameModelD}_anom=${nameModelD}_small-conform_dims(dimsizes(${nameModelD}_small),${nameModelD}_mean, (/1,2,3/))
+  ${nameModelE}_anom=${nameModelE}_small-conform_dims(dimsizes(${nameModelE}_small),${nameModelE}_mean, (/1,2,3/))
 
   ${nameModelA0}_diff=${nameModelA}_mean
-  ${nameModelB0}_diff=${nameModelB}_mean
-
   ${nameModelA0}_diff=${nameModelA}_mean-${nameObs}_mean
+
+  ${nameModelB0}_diff=${nameModelB}_mean
   ${nameModelB0}_diff=${nameModelB}_mean-${nameObs}_mean
 
-;---Specify units
+  ${nameModelC0}_diff=${nameModelC}_mean
+  ${nameModelC0}_diff=${nameModelC}_mean-${nameObs}_mean
+
+  ${nameModelD0}_diff=${nameModelD}_mean
+  ${nameModelD0}_diff=${nameModelD}_mean-${nameObs}_mean
+
+  ${nameModelE0}_diff=${nameModelE}_mean
+  ${nameModelE0}_diff=${nameModelE}_mean-${nameObs}_mean
 
   ${nameObs}_mean@units="$units"
   ${nameModelA}_mean@units="$units"
   ${nameModelB}_mean@units="$units"
+  ${nameModelC}_mean@units="$units"
+  ${nameModelD}_mean@units="$units"
+  ${nameModelE}_mean@units="$units"
   ${nameModelA0}_diff@units="$units"
   ${nameModelB0}_diff@units="$units"
+  ${nameModelC0}_diff@units="$units"
+  ${nameModelD0}_diff@units="$units"
+  ${nameModelE0}_diff@units="$units"
 
-;---Define weights for area average
+; area average
 
   rad    = 4.0*atan(1.0)/180.0
   re     = 6371220.0
@@ -352,48 +375,61 @@ cat << EOF > $nclscript
   dy(nlat-1)    = abs(lat_0(nlat-1)-lat_0(nlat-2))*rr
 
   weights2   = dx*dy 
+  
+   ;weights2  = new((/nlat, nlon/), typeof(${nameModelA}_mean))
+   ;weights2  = conform (weights2, dydx, 0)
 
-  opt=0  ; ignore missing values
+         opt=0  ; ignore missing values
 
-;---Calculate area means of the raw fields
+         ${nameModelA}_aave=wgt_areaave_Wrap(${nameModelA}_mean, weights2,1.0, opt)
+         ${nameModelB}_aave=wgt_areaave_Wrap(${nameModelB}_mean, weights2,1.0, opt)
+         ${nameModelC}_aave=wgt_areaave_Wrap(${nameModelC}_mean, weights2,1.0, opt)
+         ${nameModelD}_aave=wgt_areaave_Wrap(${nameModelD}_mean, weights2,1.0, opt)
+         ${nameModelE}_aave=wgt_areaave_Wrap(${nameModelE}_mean, weights2,1.0, opt)
 
-  ${nameModelA}_aave=wgt_areaave_Wrap(${nameModelA}_mean, weights2,1.0, opt)
-  ${nameModelB}_aave=wgt_areaave_Wrap(${nameModelB}_mean, weights2,1.0, opt)
-  ${nameObs}_aave=wgt_areaave_Wrap(${nameObs}_mean, weights2,1.0, opt)
+         ${nameModelA0}_aave=wgt_areaave_Wrap(${nameModelA0}_diff, weights2,1.0, opt)
+         ${nameModelB0}_aave=wgt_areaave_Wrap(${nameModelB0}_diff, weights2,1.0, opt)
+         ${nameModelC0}_aave=wgt_areaave_Wrap(${nameModelC0}_diff, weights2,1.0, opt)
+         ${nameModelD0}_aave=wgt_areaave_Wrap(${nameModelD0}_diff, weights2,1.0, opt)
+         ${nameModelE0}_aave=wgt_areaave_Wrap(${nameModelE0}_diff, weights2,1.0, opt)
 
-;---Calculate area means of the anomaly fields
+         ${nameObs}_aave=wgt_areaave_Wrap(${nameObs}_mean, weights2,1.0, opt)
 
-  ${nameModelA0}_aave=wgt_areaave_Wrap(${nameModelA0}_diff, weights2,1.0, opt)
-  ${nameModelB0}_aave=wgt_areaave_Wrap(${nameModelB0}_diff, weights2,1.0, opt)
+         ${nameObs}_reorder=${nameObs}_small( \$dimsObs(1)\$ | :,  \$dimsObs(0)\$ | :, \$dimsObs(2)\$ | : , \$dimsObs(3)\$ | :)
+         ${nameModelA}_reorder=${nameModelA}_small( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
+         ${nameModelB}_reorder=${nameModelB}_small( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
+         ${nameModelC}_reorder=${nameModelC}_small( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
+         ${nameModelD}_reorder=${nameModelD}_small( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
+         ${nameModelE}_reorder=${nameModelE}_small( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
 
-;---Calculate raw RMSE 
-
-  ${nameObs}_reorder=${nameObs}_small( \$dimsObs(1)\$ | :,  \$dimsObs(0)\$ | :, \$dimsObs(2)\$ | : , \$dimsObs(3)\$ | :)
-  ${nameModelA}_reorder=${nameModelA}_small( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
-  ${nameModelB}_reorder=${nameModelB}_small( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
-
-  ${nameModelA}_rmse=wgt_volrmse(${nameObs}_reorder, ${nameModelA}_reorder, 1.0,weights2,1.0, opt)
-  ${nameModelB}_rmse=wgt_volrmse(${nameObs}_reorder, ${nameModelB}_reorder, 1.0,weights2,1.0, opt)
+         ${nameModelA}_rmse=wgt_volrmse(${nameObs}_reorder, ${nameModelA}_reorder, 1.0,weights2,1.0, opt)
+         ${nameModelB}_rmse=wgt_volrmse(${nameObs}_reorder, ${nameModelB}_reorder, 1.0,weights2,1.0, opt)
+         ${nameModelC}_rmse=wgt_volrmse(${nameObs}_reorder, ${nameModelC}_reorder, 1.0,weights2,1.0, opt)
+         ${nameModelD}_rmse=wgt_volrmse(${nameObs}_reorder, ${nameModelD}_reorder, 1.0,weights2,1.0, opt)
+         ${nameModelE}_rmse=wgt_volrmse(${nameObs}_reorder, ${nameModelE}_reorder, 1.0,weights2,1.0, opt)
  
          
-;---Calculate bias-corrected RMSE
+         ${nameObs}_anomreorder=${nameObs}_anom( \$dimsObs(1)\$ | :,  \$dimsObs(0)\$ | :, \$dimsObs(2)\$ | : , \$dimsObs(3)\$ | :)
+         ${nameModelA}_anomreorder=${nameModelA}_anom( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
+         ${nameModelB}_anomreorder=${nameModelB}_anom( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
+         ${nameModelC}_anomreorder=${nameModelC}_anom( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
+         ${nameModelD}_anomreorder=${nameModelD}_anom( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
+         ${nameModelE}_anomreorder=${nameModelE}_anom( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
 
-  ${nameObs}_anomreorder=${nameObs}_anom( \$dimsObs(1)\$ | :,  \$dimsObs(0)\$ | :, \$dimsObs(2)\$ | : , \$dimsObs(3)\$ | :)
-  ${nameModelA}_anomreorder=${nameModelA}_anom( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
-  ${nameModelB}_anomreorder=${nameModelB}_anom( \$dimsModel(1)\$ | :,  \$dimsModel(0)\$ | :, \$dimsModel(2)\$ | : , \$dimsModel(3)\$ | :)
-
-  ${nameModelA}_anomrmse=wgt_volrmse(${nameObs}_anomreorder, ${nameModelA}_anomreorder, 1.0,weights2,1.0, opt)
-  ${nameModelB}_anomrmse=wgt_volrmse(${nameObs}_anomreorder, ${nameModelB}_anomreorder, 1.0,weights2,1.0, opt)
+         ${nameModelA}_anomrmse=wgt_volrmse(${nameObs}_anomreorder, ${nameModelA}_anomreorder, 1.0,weights2,1.0, opt)
+         ${nameModelB}_anomrmse=wgt_volrmse(${nameObs}_anomreorder, ${nameModelB}_anomreorder, 1.0,weights2,1.0, opt)
+         ${nameModelC}_anomrmse=wgt_volrmse(${nameObs}_anomreorder, ${nameModelC}_anomreorder, 1.0,weights2,1.0, opt)
+         ${nameModelD}_anomrmse=wgt_volrmse(${nameObs}_anomreorder, ${nameModelD}_anomreorder, 1.0,weights2,1.0, opt)
+         ${nameModelE}_anomrmse=wgt_volrmse(${nameObs}_anomreorder, ${nameModelE}_anomreorder, 1.0,weights2,1.0, opt)
    
 
-;---Set ploting specifications
 
   res                     = True
   res@gsnDraw             = False                          ; don't draw
   res@gsnFrame            = False                          ; don't advance frame
-  res@xyLineThicknesses = (/10.0, 10.0,  10.0/)          ; make second line thicker
-  res@xyLineColors      = (/"red", "blue", "black"/)          ; change line color
-  res@xyExplicitLegendLabels = (/"${nameModelA}", "${nameModelB}", "${nameObs}"/)
+  res@xyLineThicknesses = (/10.0, 10.0, 10.0, 10.0, 10.0, 10.0/)          ; make second line thicker
+  res@xyLineColors      = (/"black", "blue","red", "purple", "orange" ,"gray"/)          ; change line color
+  res@xyExplicitLegendLabels = (/"${nameModelA}", "${nameModelB}", "${nameModelC}","${nameModelD}","${nameModelE}","${nameObs}"/)
  ; res@tiMainString      = "$domain, $season,  $truelength ICs, $mask"       ; add title
   res@gsnYRefLine = 0
   res@gsnXRefLine = (/7,14,21,28,35/)
@@ -471,37 +507,49 @@ cat << EOF > $nclscript
 
   plot=new(4,graphic)  
 
-  data0=new((/3,dimsizes(${nameModelA}_aave&time)/),float)
+  data0=new((/6,dimsizes(${nameModelA}_aave&time)/),float)
   data0(0,:)=${nameModelA}_aave
   data0(1,:)=${nameModelB}_aave
-  data0(2,:)=${nameObs}_aave
+  data0(2,:)=${nameModelC}_aave
+  data0(3,:)=${nameModelD}_aave
+  data0(4,:)=${nameModelE}_aave
+  data0(5,:)=${nameObs}_aave
   data0@long_name="Area mean, " + "$units"
   data0@units="$units"
   plot(0)=gsn_csm_xy(wks,ispan(1,35,1),data0(:,0:34),res0)
 
-  data1=new((/3,dimsizes(${nameModelA}_aave&time)/),float)
+  data1=new((/5,dimsizes(${nameModelA}_aave&time)/),float)
   data1(0,:)=${nameModelA0}_aave
   data1(1,:)=${nameModelB0}_aave
+  data1(2,:)=${nameModelC0}_aave
+  data1(3,:)=${nameModelD0}_aave
+  data1(4,:)=${nameModelE0}_aave
   data1@long_name="Area mean Bias, " + "$units"
   data1@units="$units"
   plot(1)=gsn_csm_xy(wks,ispan(1,35,1),data1(:,0:34),res1)
 
-  data2=new((/3,dimsizes(${nameModelA}_aave&time)/),float)
+  data2=new((/5,dimsizes(${nameModelA}_aave&time)/),float)
   data2(0,:)=${nameModelA}_rmse
   data2(1,:)=${nameModelB}_rmse
+  data2(2,:)=${nameModelC}_rmse
+  data2(3,:)=${nameModelD}_rmse
+  data2(4,:)=${nameModelE}_rmse
   data2@long_name="Raw RMSE, " + "$units"
   data2@units="$units"
   plot(2)=gsn_csm_xy(wks,ispan(1,35,1),data2(:,0:34),res2)
 
-  data3=new((/3,dimsizes(${nameModelA}_aave&time)/),float)
+  data3=new((/5,dimsizes(${nameModelA}_aave&time)/),float)
   data3(0,:)=${nameModelA}_anomrmse
   data3(1,:)=${nameModelB}_anomrmse
+  data3(2,:)=${nameModelC}_anomrmse
+  data3(3,:)=${nameModelD}_anomrmse
+  data3(4,:)=${nameModelE}_anomrmse
   data3@long_name="Bias-corrected RMSE, "  + "$units"
   data3@units="$units"
   plot(3)=gsn_csm_xy(wks,ispan(1,35,1),data3(:,0:34),res2)
 
   panelopts                   = True
-  panelopts@gsnPanelMainString = "$domain, $mask, ${varModel}, $season, ${ystart}-${yend}, $truelength ICs"
+  panelopts@gsnPanelMainString = "$domain, $mask, ${varModel}, $season,  $truelength ICs"
 
   panelopts@amJust   = "TopLeft"
   panelopts@gsnOrientation    = "landscape"
@@ -517,7 +565,7 @@ cat << EOF > $nclscript
 
 EOF
 
-ncl linermse12_${season}.ncl
+ncl linermse12345_${season}.ncl
 
 
 

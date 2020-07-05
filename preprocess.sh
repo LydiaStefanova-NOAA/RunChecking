@@ -163,7 +163,8 @@ for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep )); do
 
             # SOIL MOISTURE AND TEMPERATURE
             if [ $varname == "soilm02m" ] ; then
-               tomatch="SOILM:0-2 m"; aggregate="-daymean"
+               #tomatch="SOILM:0-2 m | SOIL_M:0-2"; aggregate="-daymean"
+               tomatch="SOIL_M:0-2"; aggregate="-daymean"
             fi
 
             if [ -d ${indir} ] ; then 
