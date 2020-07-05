@@ -6,8 +6,6 @@
 #SBATCH -t 30                # -t specifies walltime in minutes; if in debug, cannot be more than 30
 #
 
-   module load intel/19.0.5.281
-   module load ncl
 
    source graph_settings.sh 
 
