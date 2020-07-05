@@ -11,6 +11,8 @@
 # The result is a four-panel plot with time series of a) area mean, b) area mean bias, c) raw RMS, d) bias-corrected RMS
 
 
+module load ncl
+
 for ARGUMENT in "$@"
 do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
@@ -298,6 +300,8 @@ cat << EOF > $nclscript
     ${nameModelA}_fld=where(.not.ismissing(maskerbig),${nameModelA}_fld,${nameModelA}_fld@_FillValue)
     ${nameModelB}_fld=where(.not.ismissing(maskerbig),${nameModelB}_fld,${nameModelB}_fld@_FillValue)
   end if 
+  ${nameModelA}_fld=where(.not.ismissing(${nameObs}_fld),${nameModelA}_fld,${nameModelA}_fld@_FillValue)
+  ${nameModelB}_fld=where(.not.ismissing(${nameObs}_fld),${nameModelB}_fld,${nameModelB}_fld@_FillValue)
 
 ;---Specify dimensions of lat/lon as specified in $domain
 
