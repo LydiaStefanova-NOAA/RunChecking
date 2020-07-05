@@ -25,13 +25,13 @@
     # Other specitications
 
 
-        nplots=3      #valid choices are 9 or 3  
+        nplots=9      #valid choices are 9 or 3  
         mapscript=map_compare_obs.sh    
         hardcopy=no         # Valid choices are yes no      
         domain=Global       # Valid choices see [case "$domain" list] in mapping script
                             # NB: keep in mind that verifying obs for tmpsfc (OSTIA SST) are not valid for ice-covered areas because tmpsfc there is not sst
         
-        declare -a varlist=( "prate" )            # Valid choices for comparison with OBS are "tmpsfc" "prate" "ulwrftoa" "tmp2m" "t2min" "t2max" 
+        declare -a varlist=( "t2min" "tmpsfc" )            # Valid choices for comparison with OBS are "tmpsfc" "prate" "ulwrftoa" "tmp2m" "t2min" "t2max" 
         declare -a seasonlist=( "DJF" "JJA" )     # Valid choices are "DJF" "MAM" "JJA" "SON" "AllAvailable"
 
 

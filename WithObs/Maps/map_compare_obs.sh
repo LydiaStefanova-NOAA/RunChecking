@@ -38,9 +38,6 @@ do
             *)
     esac
 
-echo "nplots is $nplots"
-
-
 done
 
 case "$domain" in 
@@ -351,7 +348,7 @@ cat << EOF > $nclscript
          ${nameModelBA}_aave=wgt_areaave_Wrap(${nameModelBA}_diff, weights2,1.0, opt)
          ${nameObs}_aave=wgt_areaave_Wrap(${nameObs}_mean, weights2,1.0, opt)
 
-         # This is the area average of the RMS of the time-means; not good. 
+         ; This is the area average of the RMS of the time-means; not good. 
          ${nameModelA}_rmsd=wgt_arearmse(${nameObs}_mean,${nameModelA}_mean,weights2,1.0, opt)
          ${nameModelB}_rmsd=wgt_arearmse(${nameObs}_mean,${nameModelB}_mean,weights2,1.0, opt)
          ${nameModelBA}_rmsd=wgt_arearmse(${nameModelA}_mean,${nameModelB}_mean,weights2,1.0, opt)
@@ -395,6 +392,17 @@ cat << EOF > $nclscript
      res@gsnAddCyclic        = False
   end if
 
+  if (isStrSubset("$domain","NP")) then
+     res@mpShapeMode="FixedAspectFitBB"
+     res@gsnPolar            = "NH"               ; specify the hemisphere
+     res@mpCenterLonF = -45
+  end if
+  if (isStrSubset("$domain","SP")) then
+     res@mpShapeMode="FixedAspectFitBB"
+     res@gsnPolar            = "SH"               ; specify the hemisphere
+     res@mpCenterLonF = -45
+  end if
+
   res0=res
   res1=res
   res2=res
@@ -404,22 +412,36 @@ cat << EOF > $nclscript
   setcolors("{$varModel}")
 
   if ($nplots.eq.9) then
-     plot(0) = gsn_csm_contour_map(wks,${nameObs}_mean,res0)
-     plot(3) = gsn_csm_contour_map(wks,${nameModelA}_mean,res0)
-     plot(4) = gsn_csm_contour_map(wks,${nameModelA0}_diff,res1)
-     plot(6) = gsn_csm_contour_map(wks,${nameModelB}_mean,res0)
-     plot(7) = gsn_csm_contour_map(wks,${nameModelB0}_diff,res1)
-     plot(8) = gsn_csm_contour_map(wks,${nameModelBA}_diff,res1)
-     panelopts@gsnPanelMainString = "${varModel}, $season, day ${d1p1} - day ${d2p1},  $truelength ICs"
+     if (isStrSubset("$domain","NP").or.isStrSubset("$domain","SP")) then
+        plot(0) = gsn_csm_contour_map_polar(wks,${nameObs}_mean,res0)
+        plot(3) = gsn_csm_contour_map_polar(wks,${nameModelA}_mean,res0)
+        plot(4) = gsn_csm_contour_map_polar(wks,${nameModelA0}_diff,res1)
+        plot(6) = gsn_csm_contour_map_polar(wks,${nameModelB}_mean,res0)
+        plot(7) = gsn_csm_contour_map_polar(wks,${nameModelB0}_diff,res1)
+        plot(8) = gsn_csm_contour_map_polar(wks,${nameModelBA}_diff,res1)
+     else 
+        plot(0) = gsn_csm_contour_map(wks,${nameObs}_mean,res0)
+        plot(3) = gsn_csm_contour_map(wks,${nameModelA}_mean,res0)
+        plot(4) = gsn_csm_contour_map(wks,${nameModelA0}_diff,res1)
+        plot(6) = gsn_csm_contour_map(wks,${nameModelB}_mean,res0)
+        plot(7) = gsn_csm_contour_map(wks,${nameModelB0}_diff,res1)
+        plot(8) = gsn_csm_contour_map(wks,${nameModelBA}_diff,res1)
+     end if
      gsn_panel(wks,plot,(/3,3,3/),panelopts)
   end if
   if ($nplots.eq.3) then
-     plot(0) = gsn_csm_contour_map(wks,${nameModelA0}_diff,res1)
-     plot(1) = gsn_csm_contour_map(wks,${nameModelB0}_diff,res1)
-     plot(2) = gsn_csm_contour_map(wks,${nameModelBA}_diff,res1)
-     panelopts@gsnPanelMainString = "${varModel}, $season, day ${d1p1} - day ${d2p1},  $truelength ICs"
+     if (isStrSubset("$domain","NP").or.isStrSubset("$domain","SP")) then
+        plot(0) = gsn_csm_contour_map_polar(wks,${nameModelA0}_diff,res1)
+        plot(1) = gsn_csm_contour_map_polar(wks,${nameModelB0}_diff,res1)
+        plot(2) = gsn_csm_contour_map_polar(wks,${nameModelBA}_diff,res1)
+     else
+        plot(0) = gsn_csm_contour_map(wks,${nameModelA0}_diff,res1)
+        plot(1) = gsn_csm_contour_map(wks,${nameModelB0}_diff,res1)
+        plot(2) = gsn_csm_contour_map(wks,${nameModelBA}_diff,res1)
+     end if
      gsn_panel(wks,plot,(/3/),panelopts)
   end if
+  panelopts@gsnPanelMainString = "${varModel}, $season, day ${d1p1} - day ${d2p1},  $truelength ICs"
 
 EOF
 
