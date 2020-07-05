@@ -6,7 +6,7 @@
 - Convert hourly grib files to a single file per IC with 35 daily values: `Prep/drive_preprocess.sh` (invokes `preprocess.sh`). Must specify:        
 -`exp_new` (ID for new exp)   
 -`upload_root` (directory with uploaded 6-hourly grib files)   
--`processed_root` (directory for storing netcdfs)
+-`exp_root` (directory for storing netcdfs)
 
 **Objective A** 
 
