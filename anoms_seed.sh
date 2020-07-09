@@ -11,6 +11,8 @@
 # The result is a four-panel plot with time series of a) area mean, b) area mean bias, c) raw RMS, d) bias-corrected RMS
 
 
+module load ncl
+
 for ARGUMENT in "$@"
 do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
@@ -59,6 +61,14 @@ esac
           ncvarModel="TMAX_2maboveground"; multModel=1.; offsetModel=0.; units="deg K"
           nameObs="t2max_CPC";  varObs="tmax"; ncvarObs="tmax"; multObs=1.; offsetObs=273.15
        fi
+       if [ "$varModel" == "tmp2m" ] ; then
+          ncvarModel="TMP_2maboveground"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
+          nameObs="era5";  varObs="t2m"; ncvarObs="TMP_2maboveground"; multObs=1.; offsetObs=0.
+       fi
+       if [ "$varModel" == "t2m_fromminmax" ] ; then
+          ncvarModel="t2m_fromminmax"; multModel=1.; offsetModel=0.; units="deg K";mask="landonly"
+          nameObs="t2m_from_minmax_CPC";  varObs="t2m_CPC"; ncvarObs="t2m"; multObs=1.; offsetObs=273.15
+       fi
        if [ "$varModel" == "t2min" ] ; then
           ncvarModel="TMIN_2maboveground"; multModel=1.; offsetModel=0.; units="deg K"
           nameObs="t2min_CPC";  varObs="tmin"; ncvarObs="tmin"; multObs=1.; offsetObs=273.15
@@ -92,99 +102,45 @@ esac
 
        LENGTH=0   # Total length of each file listing
 
-       for (( yyyy=$ystart; yyyy<=$yend; yyyy+=$ystep ))  ; do
-       for (( mm1=$mstart; mm1<=$mend; mm1+=$mstep )) ; do
-       for (( dd1=$dstart; dd1<=$dend; dd1+=$dstep )) ; do
-           mm=$(printf "%02d" $mm1)
-           dd=$(printf "%02d" $dd1)
-           tag=$yyyy$mm${dd}
+       for seed in 1 2 3 4 5 6 7 8 9 10 ; do
+
+           tag=${ystart}0101
+
+           #echo  $seed
+
+           #echo $whereexp/$nameModelB$seed/1p00/dailymean/${tag}/${varModel}.${nameModelB}${seed}.${tag}.dailymean.1p00.nc
+
            if [ -f $whereexp/$nameModelA/1p00/dailymean/${tag}/${varModel}.${nameModelA}.${tag}.dailymean.1p00.nc ] ; then
-              if [ -f $whereexp/$nameModelB/1p00/dailymean/${tag}/${varModel}.${nameModelB}.${tag}.dailymean.1p00.nc ] ; then
+              if [ -f $whereexp/$nameModelB$seed/1p00/dailymean/${tag}/${varModel}.${nameModelB}${seed}.${tag}.dailymean.1p00.nc ] ; then
                   pathObs="$whereobs/$nameObs/1p00/dailymean"
                   if [ "$nameObs" == "pcp_TRMM" ] ;  then
                       pathObs="$whereobs/$nameObs/1p00"
                   fi
-                  #echo "yes" $pathObs/${varObs}.day.mean.${tag}.1p00.nc
 
                   if [ -f $pathObs/${varObs}.day.mean.${tag}.1p00.nc ] ; then
                    
-                   
-                  case "${season}" in
-                      *"DJF"*)
-                          if [ $mm1 -ge 12 ] || [ $mm1 -le 2 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
-                                 pathModel="$whereexp/$nameModel/1p00/dailymean"
-                                 ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
-                             done
-	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                       
-                          fi
-                      ;;
-                      *"MAM"*)
-                          if [ $mm1 -ge 3 ] && [ $mm1 -le 5 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
-                                 pathModel="$whereexp/$nameModel/1p00/dailymean"
-                                 ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
-                             done
-	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                      
-                          fi
-                      ;;
-                      *"JJA"*)
-                          if [ $mm1 -ge 6 ] && [ $mm1 -le 8 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
-                                 pathModel="$whereexp/$nameModel/1p00/dailymean"
-                                 ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
-                             done
-	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                     
-                          fi
-                      ;;
-                      *"SON"*)
-                          if [ $mm1 -ge 9 ] && [ $mm1 -le 11 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
-                                 pathModel="$whereexp/$nameModel/1p00/dailymean"
-                                 ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
-                             done
-	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                   
-                          fi
-                      ;;
-                      *"AllAvailable"*)
-                             for nameModel in $nameModelA $nameModelB ; do
-                                 pathModel="$whereexp/$nameModel/1p00/dailymean"
-                                 ls -d -1 $pathModel/${tag}/${varModel}.${nameModel}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModel}-list.txt
-                             done
-	                         ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                  
-                      ;;
-                 esac
+                     pathModel="$whereexp/$nameModelA/1p00/dailymean"
+                     ls -d -1 $pathModel/${tag}/${varModel}.${nameModelA}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModelA}-list.txt
+
+                     pathModel="$whereexp/$nameModelB$seed/1p00/dailymean"
+                     ls -d -1 $pathModel/${tag}/${varModel}.${nameModelB}${seed}.${tag}.dailymean.1p00.nc >> ${varModel}-${nameModelB}-list.txt
+	                 ls -d -1 $pathObs/${varObs}.day.mean.${tag}.1p00.nc >> ${varModel}-${nameObs}-list.txt
+                         LENGTH="$(($LENGTH+1))"                  
 
               fi
            fi
            fi
        done
-       done
-       done
+
 
    echo "A total of $LENGTH ICs are being processed"
    truelength=$LENGTH
 
-# The if below takes care of the situation where there is a single IC by listing it twice (so that it can still be read with "addfiles")
-   if [ $LENGTH -eq 1 ] ; then
-                             for nameModel in $nameModelA $nameModelB ; do
-                              cat ${varModel}-${nameModel}-list.txt ${varModel}-${nameModel}-list.txt > tmp.txt
-                              mv tmp.txt ${varModel}-${nameModel}-list.txt
-                             done
-                              cat ${varModel}-${nameObs}-list.txt ${varModel}-${nameObs}-list.txt > tmp.txt
-                              mv tmp.txt ${varModel}-${nameObs}-list.txt
-                                 LENGTH="$(($LENGTH+1))"                       # How many ICs are considered
-   fi
-#
 
    echo "A total of $truelength ICs are being processed"
 
    LENGTHm1="$(($LENGTH-1))"                          # Needed for counters starting at 0
+
    s1=0; s2=$LENGTHm1                                 # Glom together all ICs
    d1=0; d2=34                                        # from day=d1 to day=d1 (counter starting at 0)
    d1p1="$(($d1+1))"                                  # day1 (counter starting at 1)
@@ -233,7 +189,7 @@ cat << EOF > $nclscript
 ;   Note that 1 is land, 0 is ocean, 2 is ice-covered ocean
 ;   variable "masker" is set to fill value over land
 
-  mask_add=addfile("$whereexp/$nameModelB/1p00/dailymean/20120101/land.${nameModelB}.20120101.dailymean.1p00.nc", "r")
+  mask_add=addfile("$whereexp/$nameModelA/1p00/dailymean/20120101/land.${nameModelA}.20120101.dailymean.1p00.nc", "r")
   masker=mask_add->LAND_surface(0,:,:)
   masker=where(masker.ne.1,masker,masker@_FillValue)   
 
@@ -290,6 +246,8 @@ cat << EOF > $nclscript
     ${nameModelA}_fld=where(.not.ismissing(maskerbig),${nameModelA}_fld,${nameModelA}_fld@_FillValue)
     ${nameModelB}_fld=where(.not.ismissing(maskerbig),${nameModelB}_fld,${nameModelB}_fld@_FillValue)
   end if 
+  ${nameModelA}_fld=where(.not.ismissing(${nameObs}_fld),${nameModelA}_fld,${nameModelA}_fld@_FillValue)
+  ${nameModelB}_fld=where(.not.ismissing(${nameObs}_fld),${nameModelB}_fld,${nameModelB}_fld@_FillValue)
 
 ;---Specify dimensions of lat/lon as specified in $domain
 
